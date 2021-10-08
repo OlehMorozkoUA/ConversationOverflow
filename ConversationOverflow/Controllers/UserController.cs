@@ -34,5 +34,21 @@ namespace ConversationOverflow.Controllers
         {
             return _conversationOverflowDbContext.Users.FirstOrDefault(user => user.Id == id);
         }
+        [HttpGet]
+        [Route("Find/{login}")]
+        public User Get(string login)
+        {
+            return _conversationOverflowDbContext.Users.FirstOrDefault(user => user.Login == login);
+        }
+        /*[HttpGet("{login}")]
+        public User GetUserByLogin(string login)
+        {
+            return _conversationOverflowDbContext.Users.FirstOrDefault(user => user.Login == login);
+        }
+        [HttpGet("{email}")]
+        public User GetUserByEmail(string email)
+        {
+            return _conversationOverflowDbContext.Users.FirstOrDefault(user => user.Email == email);
+        }*/
     }
 }
