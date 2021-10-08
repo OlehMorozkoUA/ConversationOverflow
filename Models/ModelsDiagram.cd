@@ -1,0 +1,166 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Models.Classes.User">
+    <Position X="0.5" Y="2.5" Width="1.5" />
+    <AssociationLine Name="Status" Type="Models.Interfaces.Status">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.141" Y="0.091" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AAACAEAEACAAAAAAAAAAAIAAAAAIAAACAAAQAAAAAAg=</HashCode>
+      <FileName>Classes\User.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Status" />
+    </ShowAsAssociation>
+    <Lollipop Position="0.721" />
+  </Class>
+  <Class Name="Models.Classes.Message">
+    <Position X="6" Y="2.5" Width="1.5" />
+    <AssociationLine Name="Attachment" Type="Models.Classes.Attachment" ManuallyRouted="true">
+      <Path>
+        <Point X="6.75" Y="4.18" />
+        <Point X="6.75" Y="4.715" />
+        <Point X="6.5" Y="4.715" />
+        <Point X="6.5" Y="4.75" />
+      </Path>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAiAAAAAA=</HashCode>
+      <FileName>Classes\Message.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Attachment" />
+    </ShowAsAssociation>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Models.Classes.UserMessage">
+    <Position X="3.25" Y="2.5" Width="1.75" />
+    <AssociationLine Name="Attachment" Type="Models.Classes.Attachment" ManuallyRouted="true">
+      <Path>
+        <Point X="4.125" Y="4.565" />
+        <Point X="4.125" Y="5.083" />
+        <Point X="5.479" Y="5.083" />
+        <Point X="5.479" Y="6.136" />
+        <Point X="5.75" Y="6.136" />
+      </Path>
+    </AssociationLine>
+    <AssociationLine Name="ToGroup" Type="Models.Classes.Group" ManuallyRouted="true" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="3.625" Y="4.565" />
+        <Point X="3.625" Y="5.083" />
+        <Point X="3.969" Y="5.083" />
+        <Point X="3.969" Y="6.032" />
+        <Point X="5.062" Y="6.032" />
+        <Point X="5.062" Y="6.25" />
+      </Path>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>IAACgAAgAAAAAAAAAABQAAAAAAAAQAAEAAAAICAAAAA=</HashCode>
+      <FileName>Classes\UserMessage.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="ToUser" />
+      <Property Name="Message" />
+      <Property Name="FromUser" />
+      <Property Name="Attachment" />
+      <Property Name="ToGroup" />
+    </ShowAsAssociation>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Models.Classes.Attachment">
+    <Position X="5.75" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAACAAAAgAIAAAAAAAQAAAAAAQBEAAAAgAAAAAA=</HashCode>
+      <FileName>Classes\Attachment.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Models.Classes.GroupUser">
+    <Position X="2.25" Y="5.25" Width="1.5" />
+    <AssociationLine Name="Group" Type="Models.Classes.Group" ManuallyRouted="true" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="3" Y="6.738" />
+        <Point X="3" Y="7.282" />
+        <Point X="3.812" Y="7.282" />
+        <Point X="3.812" Y="7.312" />
+        <Point X="4" Y="7.312" />
+      </Path>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AAADAEAEAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Classes\GroupUser.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="User" />
+      <Property Name="Group" />
+    </ShowAsAssociation>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Models.Classes.Group">
+    <Position X="4" Y="6.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAgAAAAAA=</HashCode>
+      <FileName>Classes\Group.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Interface Name="Models.Interfaces.IUser" Collapsed="true">
+    <Position X="0.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAEAEACAAAAAAAAAAAIAAAAAIAAACAAAQAAAAAAg=</HashCode>
+      <FileName>Interfaces\IUser.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Models.Interfaces.IIdentity&lt;T&gt;" Collapsed="true">
+    <Position X="0.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Interfaces\IIdentity.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Models.Interfaces.IMessage" Collapsed="true">
+    <Position X="2.25" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAiAAAAAA=</HashCode>
+      <FileName>Interfaces\IMessage.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Models.Interfaces.IUserMessage" Collapsed="true">
+    <Position X="4" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAAAgAAAAAAAAAAAAABAAAAAAAAAQAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Interfaces\IUserMessage.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Models.Interfaces.IAttachment" Collapsed="true">
+    <Position X="5.75" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAACAAAAgAIAAAAAAAQAAAAAAQBEAAAAgAAAAAA=</HashCode>
+      <FileName>Interfaces\IAttachment.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Models.Interfaces.IGroup" Collapsed="true">
+    <Position X="2.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAgAAAAAA=</HashCode>
+      <FileName>Interfaces\IGroup.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Models.Interfaces.IGroupUser" Collapsed="true">
+    <Position X="4" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAEAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Interfaces\IGroupUser.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Enum Name="Models.Interfaces.Status" Collapsed="true">
+    <Position X="0.5" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAABAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Interfaces\Status.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
