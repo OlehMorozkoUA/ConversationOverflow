@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using ConnectToDB;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Models.Classes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,23 +21,31 @@ namespace ConversationOverflow.Controllers
         };
 
         private readonly ILogger<WeatherForecastController> _logger;
+        private readonly IServiceProvider _service;
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
+        public WeatherForecastController(ILogger<WeatherForecastController> logger, IServiceProvider service)
         {
             _logger = logger;
+            _service = service;
         }
 
         [HttpGet]
-        public IEnumerable<WeatherForecast> Get()
+        public IEnumerable<User> Get()
         {
-            var rng = new Random();
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
+            var _conversationOverflowDbContext = _service.GetService(typeof(ConversationOverflowDbContext)) as ConversationOverflowDbContext;
+            return _conversationOverflowDbContext.Users;
+            /*return Enumerable.Range(1, 5).Select(index => new WeatherForecast
             {
                 Date = DateTime.Now.AddDays(index),
                 TemperatureC = rng.Next(-20, 55),
                 Summary = Summaries[rng.Next(Summaries.Length)]
             })
-            .ToArray();
+            .ToArray();*/
         }
+
+        /*public IEnumerable<User> GetUsers()
+        {
+            return _conversationOverflowDbContext.Users;
+        }*/
     }
 }
