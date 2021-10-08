@@ -12,10 +12,16 @@ namespace ConnectToDB
         public DbSet<Group> Groups { get; set; }
         public DbSet<GroupUser> GroupUsers { get; set; }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        public ConversationOverflowDbContext(DbContextOptions<ConversationOverflowDbContext> options)
+            : base(options)
+        {
+            Database.EnsureCreated();   // создаем базу данных при первом обращении
+        }
+
+        /*protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlServer(
                 @"Data Source=.\sqlexpress;Initial Catalog=ConversationOverflow;Integrated Security=True;");
-        }
+        }*/
     }
 }
