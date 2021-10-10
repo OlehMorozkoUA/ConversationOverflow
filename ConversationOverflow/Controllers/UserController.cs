@@ -15,14 +15,12 @@ namespace ConversationOverflow.Controllers
     [Route("[controller]")]
     public class UserController : ControllerBase
     {
-        private readonly ILogger<WeatherForecastController> _logger;
-        private readonly IServiceProvider _service;
+        private readonly ILogger<UserController> _logger;
         private readonly IUserRepository _users;
 
-        public UserController(ILogger<WeatherForecastController> logger, IServiceProvider service, IUserRepository users)
+        public UserController(ILogger<UserController> logger, IServiceProvider service, IUserRepository users)
         {
             _logger = logger;
-            _service = service;
             _users = users;
         }
 

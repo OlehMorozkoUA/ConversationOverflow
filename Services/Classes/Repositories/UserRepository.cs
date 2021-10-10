@@ -40,12 +40,14 @@ namespace Services.Classes.Repositories
                                (user.LastName.Contains(name.Trim()) && user.LastName.StartsWith(name.Trim())) ||
                                ((user.FirstName + " " + user.LastName).Contains(name.Trim()) && (user.FirstName + " " + user.LastName).StartsWith(name.Trim())) ||
                                ((user.LastName + " " + user.FirstName).Contains(name.Trim()) && (user.LastName + " " + user.FirstName).StartsWith(name.Trim())))
+                .OrderBy(user => user.FirstName)
                 .ToListAsync();
         public async Task<List<User>> GetUsersByBirthdayAsync(string birthday)
             => await _conversationOverflowDbContext.Users.AsQueryable()
                 .Where(user => (user.Birthday.Year.ToString()+"-"+
                                 user.Birthday.Month.ToString()+"-"+
                                 user.Birthday.Day.ToString()) == birthday)
+                .OrderBy(user => user.Birthday)
                 .ToListAsync();
         /*public async Task<List<User>> GetUsersAsync(System.Linq.Expressions.Expression<Func<List<User>,bool>> predicate, System.Threading.CancellationToken cancellationToken = default)
         {
