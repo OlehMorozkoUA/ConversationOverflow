@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Models.Classes;
+using Services.Classes.Repositories;
+using Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,40 +17,31 @@ namespace ConversationOverflow.Controllers
     {
         private readonly ILogger<WeatherForecastController> _logger;
         private readonly IServiceProvider _service;
-        private readonly ConversationOverflowDbContext _conversationOverflowDbContext;
+        private readonly IUserRepository _users;
 
-        public UserController(ILogger<WeatherForecastController> logger, IServiceProvider service)
+        public UserController(ILogger<WeatherForecastController> logger, IServiceProvider service, IUserRepository users)
         {
             _logger = logger;
             _service = service;
-            _conversationOverflowDbContext = service.GetService(typeof(ConversationOverflowDbContext)) as ConversationOverflowDbContext;
+            _users = users;
         }
 
         [HttpGet]
-        public IEnumerable<User> Get()
-        {
-            return _conversationOverflowDbContext.Users;
-        }
-        [HttpGet("{id}")]
-        public User Get(int id)
-        {
-            return _conversationOverflowDbContext.Users.FirstOrDefault(user => user.Id == id);
-        }
+        public async Task<IEnumerable<User>> Get() => await _users.GetAllUserAsync();
+
+        [HttpGet("{id:int}")]
+        public async Task<User> Get(int id) => await _users.GetUserByIdAsync(id);
+
         [HttpGet]
-        [Route("Find/{login}")]
-        public User Get(string login)
-        {
-            return _conversationOverflowDbContext.Users.FirstOrDefault(user => user.Login == login);
-        }
-        /*[HttpGet("{login}")]
-        public User GetUserByLogin(string login)
-        {
-            return _conversationOverflowDbContext.Users.FirstOrDefault(user => user.Login == login);
-        }
-        [HttpGet("{email}")]
-        public User GetUserByEmail(string email)
-        {
-            return _conversationOverflowDbContext.Users.FirstOrDefault(user => user.Email == email);
-        }*/
+        [Route("login/{login}")]
+        public async Task<User> GetByLogin(string login) => await _users.GetUserByLoginAsync(login);
+
+        [HttpGet]
+        [Route("email/{email}")]
+        public async Task<User> GetByEmail(string email) => await _users.GetUserByLoginAsync(email);
+
+        [HttpGet]
+        [Route("name/{name}")]
+        public async Task<List<User>> GetByName(string name) => await _users.GetUserByNameAsync(name);
     }
 }

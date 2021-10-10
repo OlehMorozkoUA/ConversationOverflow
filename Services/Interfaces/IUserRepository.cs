@@ -11,6 +11,8 @@ namespace Services.Interfaces
         Task<List<User>> GetAllUserAsync();
         Task<User> GetUserByIdAsync(int id);
         Task<User> CreateUserAsync(User user);
-
+        Task<User> GetUserByLoginAsync(string login);
+        Task<User> GetUserByEmailAsync(string email);
+        Task<List<User>> GetUserByNameAsync(string name);
     }
 }

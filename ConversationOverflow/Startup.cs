@@ -10,6 +10,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Services.Classes.Repositories;
+using Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,6 +38,7 @@ namespace ConversationOverflow
             var connectionString = Configuration.GetConnectionString("ConversationOverflowConnection");
 
             services.AddDbContext<ConversationOverflowDbContext>(options => options.UseSqlServer(connectionString));
+            services.AddScoped<IUserRepository, UserRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
