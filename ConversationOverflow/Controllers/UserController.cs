@@ -43,5 +43,8 @@ namespace ConversationOverflow.Controllers
         [HttpGet]
         [Route("name/{name}")]
         public async Task<List<User>> GetByName(string name) => await _users.GetUserByNameAsync(name);
+        [HttpGet]
+        [Route("birthday/{birthday}")]
+        public async Task<List<User>> GetByBirthday(string birthday) => await _users.GetUsersByBirthdayAsync(birthday);
     }
 }

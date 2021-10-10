@@ -14,5 +14,6 @@ namespace Services.Interfaces
         Task<User> GetUserByLoginAsync(string login);
         Task<User> GetUserByEmailAsync(string email);
         Task<List<User>> GetUserByNameAsync(string name);
+        Task<List<User>> GetUsersByBirthdayAsync(string birthday);
     }
 }
