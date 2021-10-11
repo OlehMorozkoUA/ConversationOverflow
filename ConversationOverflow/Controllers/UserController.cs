@@ -44,5 +44,21 @@ namespace ConversationOverflow.Controllers
         [HttpGet]
         [Route("birthday/{birthday}")]
         public async Task<List<User>> GetByBirthday(string birthday) => await _users.GetUsersByBirthdayAsync(birthday);
+        [HttpPost]
+        [Route("registrate")]
+        public async Task<User> CreateUser(string login, string password, string email, string firstname, string lastname, DateTime birthday)
+        {
+            User user = new User()
+            {
+                Login = login,
+                Password = password,
+                Email = email,
+                FirstName = firstname,
+                LastName = lastname,
+                Birthday = birthday,
+                Status = Models.Interfaces.Status.User
+            };
+            return await _users.CreateUserAsync(user);
+        }
     }
 }
