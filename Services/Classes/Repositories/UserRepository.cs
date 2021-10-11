@@ -20,9 +20,13 @@ namespace Services.Classes.Repositories
         }
         public async Task<User> CreateUserAsync(User user)
         {
-            _conversationOverflowDbContext.Add(user);
-            await _conversationOverflowDbContext.SaveChangesAsync();
-
+            bool isExist = await IsExistLogin(user.Login) && await IsExistEmail(user.Email);
+            if (isExist)
+            {
+                _conversationOverflowDbContext.Add(user);
+                await _conversationOverflowDbContext.SaveChangesAsync();
+            }
+            
             return user;
         }
 
@@ -53,6 +57,7 @@ namespace Services.Classes.Repositories
             => (await GetUserByLoginAsync(login) != null) ? true : false;
         public async Task<bool> IsExistEmail(string email)
             => (await GetUserByEmailAsync(email) != null) ? true : false;
+        
         /*public async Task<List<User>> GetUsersAsync(System.Linq.Expressions.Expression<Func<List<User>,bool>> predicate, System.Threading.CancellationToken cancellationToken = default)
         {
             return await _conversationOverflowDbContext.Users.FindAsync
