@@ -31,7 +31,9 @@ namespace Services.Classes.Repositories
         }
 
         public async Task<List<User>> GetAllUserAsync()
-            => await _conversationOverflowDbContext.Users.ToListAsync();
+            => await _conversationOverflowDbContext.Users.AsQueryable()
+            .OrderBy(user => (user.FirstName + user.LastName))
+            .ToListAsync();
         public async Task<User> GetUserByIdAsync(int id)
             => await _conversationOverflowDbContext.Users.FirstOrDefaultAsync(user => user.Id == id);
         public async Task<User> GetUserByLoginAsync(string login)
