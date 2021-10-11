@@ -49,6 +49,10 @@ namespace Services.Classes.Repositories
                                 user.Birthday.Day.ToString()) == birthday)
                 .OrderBy(user => user.Birthday)
                 .ToListAsync();
+        public async Task<bool> IsExistLogin(string login)
+            => (await GetUserByLoginAsync(login) != null) ? true : false;
+        public async Task<bool> IsExistEmail(string email)
+            => (await GetUserByEmailAsync(email) != null) ? true : false;
         /*public async Task<List<User>> GetUsersAsync(System.Linq.Expressions.Expression<Func<List<User>,bool>> predicate, System.Threading.CancellationToken cancellationToken = default)
         {
             return await _conversationOverflowDbContext.Users.FindAsync
