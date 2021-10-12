@@ -20,8 +20,8 @@ namespace Services.Classes.Repositories
         }
         public async Task<User> CreateUserAsync(User user)
         {
-            //bool isExist = await IsExistLogin(user.Login) && await IsExistEmail(user.Email);
-            if (true)
+            bool isExist = await IsExistLogin(user.Login) || await IsExistEmail(user.Email);
+            if (!isExist)
             {
                 _conversationOverflowDbContext.Add(user);
                 await _conversationOverflowDbContext.SaveChangesAsync();
@@ -60,9 +60,9 @@ namespace Services.Classes.Repositories
         public async Task<bool> IsExistEmail(string email)
             => (await GetUserByEmailAsync(email) != null) ? true : false;
         
-        /*public async Task<List<User>> GetUsersAsync(System.Linq.Expressions.Expression<Func<List<User>,bool>> predicate, System.Threading.CancellationToken cancellationToken = default)
+        public async void SendVerificationCode(string email)
         {
-            return await _conversationOverflowDbContext.Users.FindAsync
-        }*/
+
+        } 
     }
 }
