@@ -1,4 +1,5 @@
 ﻿using ConnectToDB;
+using ConversationOverflow.Dto;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Models.Classes;
@@ -28,7 +29,7 @@ namespace ConversationOverflow.Controllers
         public async Task<IEnumerable<User>> Get() => await _users.GetAllUserAsync();
 
         [HttpGet("{id:int}")]
-        public async Task<User> Get(int id) => await _users.GetUserByIdAsync(id);
+        public async Task<User> GetById(int id) => await _users.GetUserByIdAsync(id);
 
         [HttpGet]
         [Route("login/{login}")]
@@ -46,16 +47,16 @@ namespace ConversationOverflow.Controllers
         public async Task<List<User>> GetByBirthday(string birthday) => await _users.GetUsersByBirthdayAsync(birthday);
         [HttpPost]
         [Route("registrate")]
-        public async Task<User> CreateUser(string login, string password, string email, string firstname, string lastname, DateTime birthday)
+        public async Task<User> CreateUser([FromForm] RegistrateUserDto registrateDTO)
         {
             User user = new User()
             {
-                Login = login,
-                Password = password,
-                Email = email,
-                FirstName = firstname,
-                LastName = lastname,
-                Birthday = birthday,
+                Login = registrateDTO.Login,
+                Password = registrateDTO.Password,
+                Email = registrateDTO.Email,
+                FirstName = registrateDTO.FirstName,
+                LastName = registrateDTO.LastName,
+                Birthday = registrateDTO.Birthday,
                 Status = Models.Interfaces.Status.User
             };
             return await _users.CreateUserAsync(user);

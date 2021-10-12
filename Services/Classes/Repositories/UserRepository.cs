@@ -20,8 +20,8 @@ namespace Services.Classes.Repositories
         }
         public async Task<User> CreateUserAsync(User user)
         {
-            bool isExist = await IsExistLogin(user.Login) && await IsExistEmail(user.Email);
-            if (isExist)
+            //bool isExist = await IsExistLogin(user.Login) && await IsExistEmail(user.Email);
+            if (true)
             {
                 _conversationOverflowDbContext.Add(user);
                 await _conversationOverflowDbContext.SaveChangesAsync();
