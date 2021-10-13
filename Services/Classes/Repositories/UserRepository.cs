@@ -4,6 +4,7 @@ using Models.Classes;
 using Services.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -18,15 +19,31 @@ namespace Services.Classes.Repositories
         {
             _conversationOverflowDbContext = conversationOverflowDbContext;
         }
-        public async Task<User> CreateUserAsync(User user)
+        public async Task<User> CreateUserAsync(User user, string verificationCode)
         {
+            string verfCode = "";
+            bool isVerf = false;
+            using (StreamReader read = new StreamReader(Path.Combine("Content", "Verification Code.csv")))
+            {
+                while (!read.EndOfStream)
+                {
+                    string line = await read.ReadLineAsync();
+                    string[] values = line.Split(";");
+
+                    if (values[0] == user.Email)
+                    {
+                        verfCode = values[1];
+                        isVerf = true;
+                    }
+                }
+            }
             bool isExist = await IsExistLogin(user.Login) || await IsExistEmail(user.Email);
-            if (!isExist)
+            if (!isExist && isVerf && verfCode == verificationCode)
             {
                 _conversationOverflowDbContext.Add(user);
                 await _conversationOverflowDbContext.SaveChangesAsync();
             }
-            
+
             return user;
         }
 
@@ -59,10 +76,26 @@ namespace Services.Classes.Repositories
             => (await GetUserByLoginAsync(login) != null) ? true : false;
         public async Task<bool> IsExistEmail(string email)
             => (await GetUserByEmailAsync(email) != null) ? true : false;
-        
-        public async void SendVerificationCode(string email)
-        {
 
-        } 
+        public async Task SendVerificationCode(string email)
+        {
+            using (StreamReader read = new StreamReader(Path.Combine("Content", "Verification Code.csv")))
+            {
+                while (!read.EndOfStream)
+                {
+                    string line = await read.ReadLineAsync();
+                    string[] values = line.Split(";");
+
+                    if (values[0] == email) return;
+
+                }
+            }
+            using (StreamWriter file = new StreamWriter(Path.Combine("Content", "Verification Code.csv"), true))
+            {
+                Guid guid = Guid.NewGuid();
+                await file.WriteLineAsync(email + ";" + guid);
+                await Sender.Send(email, "Verification Code", guid.ToString());
+            }
+        }
     }
 }
