@@ -9,6 +9,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using ConversationOverflow.Extensions;
+using System.IO;
 
 namespace ConversationOverflow.Controllers
 {
@@ -46,9 +49,9 @@ namespace ConversationOverflow.Controllers
         [Route("birthday/{birthday}")]
         public async Task<List<User>> GetByBirthday(string birthday) => await _users.GetUsersByBirthdayAsync(birthday);
         [HttpPost]
-        [Route("registrate")]
-        public async Task<User> CreateUser([FromForm] RegistrateUserDto registrateDTO)
-        {
+        [Route("registrate/set")]
+        public async Task<User> RegistrateUser([FromForm] RegistrateUserDto registrateDTO)
+        {            
             User user = new User()
             {
                 Login = registrateDTO.Login,
@@ -59,7 +62,17 @@ namespace ConversationOverflow.Controllers
                 Birthday = registrateDTO.Birthday,
                 Status = Models.Interfaces.Status.User
             };
-            return await _users.CreateUserAsync(user);
+            HttpContext.Session.Set<User>("User", user);
+            await _users.SendVerificationCode(user.Email);
+
+            return HttpContext.Session.Get<User>("User");
+        }
+        [HttpPost]
+        [Route("registrate/verification")]
+        public async Task<User> RegistrateUser([FromForm] string verificationCode)
+        {
+            User user = HttpContext.Session.Get<User>("User");
+            return await _users.CreateUserAsync(user, verificationCode);
         }
     }
 }
