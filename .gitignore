@@ -3,5 +3,4 @@
 *obj
 *.csproj
 ConversationOverflow.sln
-gitignoreSender.cs
-*Sender.cs
+Services/Classes/Sender.cs
