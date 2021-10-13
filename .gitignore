@@ -3,4 +3,5 @@
 *obj
 *.csproj
 ConversationOverflow.sln
-gitignore
+gitignoreSender.cs
+*Sender.cs
