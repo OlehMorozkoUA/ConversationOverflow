@@ -1,13 +1,12 @@
 ﻿using ConnectToDB;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Models.Classes;
 using Services.Interfaces;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Services.Classes.Repositories
@@ -15,37 +14,66 @@ namespace Services.Classes.Repositories
     public class UserRepository : IUserRepository
     {
         private readonly ConversationOverflowDbContext _conversationOverflowDbContext;
-        public UserRepository(ConversationOverflowDbContext conversationOverflowDbContext)
+        private readonly UserManager<User> _userManager;
+        private readonly SignInManager<User> _signInManager;
+        public UserRepository(ConversationOverflowDbContext conversationOverflowDbContext,
+            UserManager<User> userManager,
+            SignInManager<User> signInManager)
         {
             _conversationOverflowDbContext = conversationOverflowDbContext;
+            _userManager = userManager;
+            _signInManager = signInManager;
         }
-        public async Task<User> CreateUserAsync(User user, string verificationCode)
+        public async Task<IdentityResult> CreateUserAsync(User user, string password)
         {
-            string verfCode = "";
-            bool isVerf = false;
-            using (StreamReader read = new StreamReader(Path.Combine("Content", "Verification Code.csv")))
-            {
-                while (!read.EndOfStream)
-                {
-                    string line = await read.ReadLineAsync();
-                    string[] values = line.Split(";");
-
-                    if (values[0] == user.Email)
-                    {
-                        verfCode = values[1];
-                        isVerf = true;
-                    }
-                }
-            }
             bool isExist = await IsExistLogin(user.Login) || await IsExistEmail(user.Email);
-            if (!isExist && isVerf && verfCode == verificationCode)
-            {
-                _conversationOverflowDbContext.Add(user);
-                await _conversationOverflowDbContext.SaveChangesAsync();
-            }
+            if (isExist) return null;
 
-            return user;
+            IdentityResult result = await _userManager.CreateAsync(user, password);
+            await _userManager.AddClaimAsync(user, new Claim(ClaimTypes.Role, "User"));
+
+            return result;
         }
+
+        public async Task<string> GenerateEmailConfirmationTokenAsync(User user)
+            => await _userManager.GenerateEmailConfirmationTokenAsync(user);
+
+        public async Task SendEmailAsync(User user, string callbackUrl)
+        {
+            EmailService emailService = new EmailService();
+            await emailService.SendEmailAsync(user.Email,
+                "Confirm your accout",
+                $"Підтвердіть реєстрацію, перейдіть за посиланням: <a href='{callbackUrl}'>link</a>");
+        }
+
+        public async Task<bool> ConfirmEmail(string userId, string code)
+        {
+            if (userId == null || code == null) return false;
+            User user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null) return false;
+            IdentityResult result = await _userManager.ConfirmEmailAsync(user, code);
+
+            if (result.Succeeded) return true;
+            else return false;
+        }
+
+        public async Task<string> LogIn(string login, string password, bool rememberme, string returnUrl)
+        {
+            User user = await _userManager.FindByNameAsync(login);
+
+            if (user == null) return "Користувача не існує!";
+            if (!await _userManager.IsEmailConfirmedAsync(user)) return "Ви не підтвердили пошту!";
+
+            SignInResult result =
+                await _signInManager.PasswordSignInAsync(login, password, rememberme, false);
+
+            if (result.Succeeded) return returnUrl;
+            else return "Неправильний пароль або логін!";
+        }
+
+        public async Task LogOut()
+            => await _signInManager.SignOutAsync();
 
         public async Task<List<User>> GetAllUserAsync()
             => await _conversationOverflowDbContext.Users.AsQueryable()
@@ -64,7 +92,7 @@ namespace Services.Classes.Repositories
                                ((user.FirstName + " " + user.LastName).Contains(name.Trim()) && (user.FirstName + " " + user.LastName).StartsWith(name.Trim())) ||
                                ((user.LastName + " " + user.FirstName).Contains(name.Trim()) && (user.LastName + " " + user.FirstName).StartsWith(name.Trim())))
                 .OrderBy(user => user.FirstName)
-                .ToListAsync();
+                .ToListAsync(); 
         public async Task<List<User>> GetUsersByBirthdayAsync(string birthday)
             => await _conversationOverflowDbContext.Users.AsQueryable()
                 .Where(user => (user.Birthday.Year.ToString()+"-"+
@@ -77,25 +105,5 @@ namespace Services.Classes.Repositories
         public async Task<bool> IsExistEmail(string email)
             => (await GetUserByEmailAsync(email) != null) ? true : false;
 
-        public async Task SendVerificationCode(string email)
-        {
-            using (StreamReader read = new StreamReader(Path.Combine("Content", "Verification Code.csv")))
-            {
-                while (!read.EndOfStream)
-                {
-                    string line = await read.ReadLineAsync();
-                    string[] values = line.Split(";");
-
-                    if (values[0] == email) return;
-
-                }
-            }
-            using (StreamWriter file = new StreamWriter(Path.Combine("Content", "Verification Code.csv"), true))
-            {
-                Guid guid = Guid.NewGuid();
-                await file.WriteLineAsync(email + ";" + guid);
-                await Sender.Send(email, "Verification Code", guid.ToString());
-            }
-        }
     }
 }
