@@ -19,9 +19,5 @@ namespace ConnectToDB
         {
             Database.EnsureCreated();
         }
-        /*protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseSqlServer(@"Data Source=.\sqlexpress;Initial Catalog=ConversationOverflow;Integrated Security=True;");
-        }*/
     }
 }
