@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Models.Classes;
+using System;
 
 namespace Models.Interfaces
 {
@@ -11,6 +12,7 @@ namespace Models.Interfaces
         public string LastName { get; set; }
         public DateTime Birthday { get; set; }
         public string ImagePath { get; set; }
+        public Location Location { get; set; }
         public Status Status { get; set; }
     }
 }
