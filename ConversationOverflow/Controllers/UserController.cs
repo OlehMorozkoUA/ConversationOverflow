@@ -1,20 +1,18 @@
-﻿using ConnectToDB;
-using ConversationOverflow.Dto;
+﻿using ConversationOverflow.Dto;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Models.Classes;
-using Services.Classes.Repositories;
 using Services.Interfaces;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using ConversationOverflow.Extensions;
-using System.IO;
+using Microsoft.AspNetCore.Identity;
+using Services.Classes;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ConversationOverflow.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("[controller]")]
     public class UserController : ControllerBase
@@ -22,7 +20,10 @@ namespace ConversationOverflow.Controllers
         private readonly ILogger<UserController> _logger;
         private readonly IUserRepository _users;
 
-        public UserController(ILogger<UserController> logger, IServiceProvider service, IUserRepository users)
+        public UserController(ILogger<UserController> logger, 
+            IUserRepository users,
+            UserManager<User> userManager,
+            SignInManager<User> signInManager)
         {
             _logger = logger;
             _users = users;
@@ -48,31 +49,52 @@ namespace ConversationOverflow.Controllers
         [HttpGet]
         [Route("birthday/{birthday}")]
         public async Task<List<User>> GetByBirthday(string birthday) => await _users.GetUsersByBirthdayAsync(birthday);
+        
         [HttpPost]
-        [Route("registrate/set")]
-        public async Task<User> RegistrateUser([FromForm] RegistrateUserDto registrateDTO)
-        {            
+        [Route("[action]")]
+        [AllowAnonymous]
+        public async Task<bool> Register([FromForm] RegisterDto registerDto)
+        {
             User user = new User()
             {
-                Login = registrateDTO.Login,
-                Password = registrateDTO.Password,
-                Email = registrateDTO.Email,
-                FirstName = registrateDTO.FirstName,
-                LastName = registrateDTO.LastName,
-                Birthday = registrateDTO.Birthday,
-                Status = Models.Interfaces.Status.User
+                Login = registerDto.Login,
+                Email = registerDto.Email,
+                FirstName = registerDto.FirstName,
+                LastName = registerDto.LastName,
+                UserName = registerDto.Login,
+                Birthday = registerDto.Birthday
             };
-            HttpContext.Session.Set<User>("User", user);
-            await _users.SendVerificationCode(user.Email);
 
-            return HttpContext.Session.Get<User>("User");
+            IdentityResult result = await _users.CreateUserAsync(user, registerDto.Password);
+
+            if (result.Succeeded)
+            {
+                string code = await _users.GenerateEmailConfirmationTokenAsync(user);
+                await _users.SendEmailAsync(user, Url.Action(
+                    "ConfirmEmail",
+                    "User",
+                    new { userId = user.Id, code = code },
+                    protocol: HttpContext.Request.Scheme));
+
+                return true;
+            }
+            else return false;
         }
+
+        [HttpGet]
+        [Route("[action]")]
+        [AllowAnonymous]
+        public async Task<bool> ConfirmEmail(string userId, string code)
+            => await _users.ConfirmEmail(userId, code);
+
         [HttpPost]
-        [Route("registrate/verification")]
-        public async Task<User> RegistrateUser([FromForm] string verificationCode)
-        {
-            User user = HttpContext.Session.Get<User>("User");
-            return await _users.CreateUserAsync(user, verificationCode);
-        }
+        [Route("[action]")]
+        [AllowAnonymous]
+        public async Task<string> LogIn([FromForm] LogInDto logInDto)
+            => await _users.LogIn(logInDto.Login, logInDto.Password, logInDto.RememberMe, logInDto.ReturnUrl);
+
+        [HttpPost]
+        [Route("[action]")]
+        public async Task LogOut() => await _users.LogOut();
     }
 }
