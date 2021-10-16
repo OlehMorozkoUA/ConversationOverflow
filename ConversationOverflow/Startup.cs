@@ -4,12 +4,14 @@ using Microsoft.AspNetCore.Authentication.AzureAD.UI;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Models.Classes;
 using Services.Classes.Repositories;
 using Services.Interfaces;
 using System;
@@ -46,7 +48,18 @@ namespace ConversationOverflow
 
             var connectionString = Configuration.GetConnectionString("ConversationOverflowConnection");
 
-            services.AddDbContext<ConversationOverflowDbContext>(options => options.UseSqlServer(connectionString));
+            services.AddDbContext<ConversationOverflowDbContext>(options => options.UseSqlServer(connectionString))
+                .AddIdentity<User, Role>(options =>
+                {
+                    options.Password.RequireDigit = false;
+                    options.Password.RequireLowercase = false;
+                    options.Password.RequireNonAlphanumeric = false;
+                    options.Password.RequireUppercase = false;
+                    options.Password.RequiredLength = 6;
+                })
+                .AddEntityFrameworkStores<ConversationOverflowDbContext>()
+                .AddDefaultTokenProviders();
+
             services.AddScoped<IUserRepository, UserRepository>();
         }
 
