@@ -15,6 +15,7 @@ namespace Services.Interfaces
         Task<LogInMessage> LogIn(string login, string password, bool rememberme, string returnUrl);
         Task LogOut();
         Task<List<User>> GetAllUserAsync();
+        Task<List<User>> GetRangeUserAsync(int interval, int index);
         Task<User> GetUserByIdAsync(int id);
         Task<User> GetUserByLoginAsync(string login);
         Task<User> GetUserByEmailAsync(string email);

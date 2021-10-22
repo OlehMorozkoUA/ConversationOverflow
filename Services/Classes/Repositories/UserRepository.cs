@@ -79,6 +79,13 @@ namespace Services.Classes.Repositories
             => await _conversationOverflowDbContext.Users.AsQueryable()
             .OrderBy(user => (user.FirstName + user.LastName))
             .ToListAsync();
+        public async Task<List<User>> GetRangeUserAsync(int interval, int index)
+            => await _conversationOverflowDbContext.Users.AsQueryable()
+            .OrderBy(user => (user.FirstName + user.LastName))
+            .Skip(index * interval)
+            .Take(interval)
+            .ToListAsync();
+
         public async Task<User> GetUserByIdAsync(int id)
             => await _conversationOverflowDbContext.Users.FirstOrDefaultAsync(user => user.Id == id);
         public async Task<User> GetUserByLoginAsync(string login)
