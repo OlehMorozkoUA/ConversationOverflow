@@ -54,6 +54,10 @@ namespace ConversationOverflow.Controllers
         [HttpGet]
         public async Task<List<User>> Get() => await _users.GetAllUserAsync();
 
+        [HttpGet]
+        [Route("range/{interval}/{index}")]
+        public async Task<List<User>> GetRange(int interval, int index) => await _users.GetRangeUserAsync(interval, index);
+
         [HttpGet("{id:int}")]
         public async Task<User> GetById(int id) => await _users.GetUserByIdAsync(id);
 
