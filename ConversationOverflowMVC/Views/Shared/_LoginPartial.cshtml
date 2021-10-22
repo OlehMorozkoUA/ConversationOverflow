@@ -1,0 +1,21 @@
+﻿<ul class="navbar-nav">
+    @if ((bool)ViewData["IsAuthenticated"])
+    {
+        <li class="nav-item">
+            <span class="navbar-text text-dark font-italic font-weight-bold">@ViewData["AuthenticatedUser"]</span>
+        </li>
+        <li class="nav-item">
+            <form method="post" asp-controller="User" asp-action="LogOutService">
+                <button type="submit" class="nav-link text-dark" style="width:auto; border: none; background-color: transparent;">
+                    Sign Out
+                </button>
+            </form>
+        </li>
+    }
+    else
+    {
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-controller="User" asp-action="LogIn">Sign In</a>
+        </li>
+    }
+</ul>

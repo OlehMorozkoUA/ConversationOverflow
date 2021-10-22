@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Models.Classes;
+using Services.Classes;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -11,7 +12,7 @@ namespace Services.Interfaces
         Task<string> GenerateEmailConfirmationTokenAsync(User user);
         Task SendEmailAsync(User user, string callbackUrl);
         Task<bool> ConfirmEmail(string userId, string code);
-        Task<string> LogIn(string login, string password, bool rememberme, string returnUrl);
+        Task<LogInMessage> LogIn(string login, string password, bool rememberme, string returnUrl);
         Task LogOut();
         Task<List<User>> GetAllUserAsync();
         Task<User> GetUserByIdAsync(int id);

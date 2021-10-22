@@ -58,18 +58,18 @@ namespace Services.Classes.Repositories
             else return false;
         }
 
-        public async Task<string> LogIn(string login, string password, bool rememberme, string returnUrl)
+        public async Task<LogInMessage> LogIn(string login, string password, bool rememberme, string returnUrl)
         {
             User user = await _userManager.FindByNameAsync(login);
 
-            if (user == null) return "Користувача не існує!";
-            if (!await _userManager.IsEmailConfirmedAsync(user)) return "Ви не підтвердили пошту!";
+            if (user == null) return new LogInMessage() { IsSuccess = false, Message = "Користувача не існує!" };
+            if (!await _userManager.IsEmailConfirmedAsync(user)) return new LogInMessage() { IsSuccess = false, Message = "Ви не підтвердили пошту!" };
 
             SignInResult result =
                 await _signInManager.PasswordSignInAsync(login, password, rememberme, false);
 
-            if (result.Succeeded) return returnUrl;
-            else return "Неправильний пароль або логін!";
+            if (result.Succeeded) return new LogInMessage() { IsSuccess = true, Message = returnUrl };
+            else return new LogInMessage() { IsSuccess = false, Message = "Неправильний пароль або логін!" };
         }
 
         public async Task LogOut()

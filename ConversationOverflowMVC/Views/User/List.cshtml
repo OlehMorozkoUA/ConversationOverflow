@@ -1,0 +1,22 @@
+﻿@using Models.Classes; 
+@model List<User>
+
+<table class="table table-hover table-bordered">
+    <thead style="color:white;background-color:black;">
+        <tr>
+            <th scope="col"></th>
+            <th scope="col">Name</th>
+            <th scope="col">Email</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (User user in Model)
+        {
+            <tr style="cursor:pointer;">
+                <td></td>
+                <td>@user.FirstName @user.LastName</td>
+                <td><a href="mailto:@user.Email"/>@user.Email</td>
+            </tr>
+        }
+    </tbody>
+</table>

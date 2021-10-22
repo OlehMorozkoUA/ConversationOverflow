@@ -9,6 +9,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Services.Classes;
 using Microsoft.AspNetCore.Authorization;
+using System.Net.Mime;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.Configuration;
+using System.Text;
 
 namespace ConversationOverflow.Controllers
 {
@@ -19,18 +24,35 @@ namespace ConversationOverflow.Controllers
     {
         private readonly ILogger<UserController> _logger;
         private readonly IUserRepository _users;
+        private readonly IConfiguration _configuration;
+        private readonly UserManager<User> _userManager;
+        private readonly SignInManager<User> _signInManager;
 
         public UserController(ILogger<UserController> logger, 
             IUserRepository users,
+            IConfiguration configuration,
             UserManager<User> userManager,
             SignInManager<User> signInManager)
         {
             _logger = logger;
             _users = users;
+            _configuration = configuration;
+            _userManager = userManager;
+            _signInManager = signInManager;
         }
 
         [HttpGet]
-        public async Task<IEnumerable<User>> Get() => await _users.GetAllUserAsync();
+        [Route("[action]")]
+        [AllowAnonymous]
+        public bool IsAuthenticated() => User.Identity.IsAuthenticated;
+
+        [HttpGet]
+        [Route("[action]")]
+        [AllowAnonymous]
+        public string AuthenticatedUser() => User.Identity.Name;
+
+        [HttpGet]
+        public async Task<List<User>> Get() => await _users.GetAllUserAsync();
 
         [HttpGet("{id:int}")]
         public async Task<User> GetById(int id) => await _users.GetUserByIdAsync(id);
@@ -90,8 +112,10 @@ namespace ConversationOverflow.Controllers
         [HttpPost]
         [Route("[action]")]
         [AllowAnonymous]
-        public async Task<string> LogIn([FromForm] LogInDto logInDto)
-            => await _users.LogIn(logInDto.Login, logInDto.Password, logInDto.RememberMe, logInDto.ReturnUrl);
+        public async Task<LogInMessage> LogIn([FromBody] LogInDto logInDto)
+        {
+            return await _users.LogIn(logInDto.Login, logInDto.Password, logInDto.RememberMe, logInDto.ReturnUrl);
+        }
 
         [HttpPost]
         [Route("[action]")]
