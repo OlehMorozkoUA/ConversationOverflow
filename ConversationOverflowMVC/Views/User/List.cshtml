@@ -1,22 +1,70 @@
 ﻿@using Models.Classes; 
 @model List<User>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<div class="row">
+    <aside class="col-sm-4"></aside>
+    <aside class="col-sm-6"></aside>
+    <aside class="col-sm-2">
+        <table class="table table-hover table-bordered">
+            <tbody id="listuser">
+                <partial name="_ListUser" />
+            </tbody>
+        </table>
 
-<table class="table table-hover table-bordered">
-    <thead style="color:white;background-color:black;">
-        <tr>
-            <th scope="col"></th>
-            <th scope="col">Name</th>
-            <th scope="col">Email</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (User user in Model)
-        {
-            <tr style="cursor:pointer;">
-                <td></td>
-                <td>@user.FirstName @user.LastName</td>
-                <td><a href="mailto:@user.Email"/>@user.Email</td>
-            </tr>
+        <div>
+            <ul class="pagination justify-content-center">
+                <li id="previous" class="page-item">
+                    <a class="page-link" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                        <span class="sr-only">Previous</span>
+                    </a>
+                </li>
+                <li class="page-item"><a class="page-link" href="#">1</a></li>
+                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                <li id="next" class="page-item">
+                    <a class="page-link" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                        <span class="sr-only">Next</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        var i = 0;
+        $("#previous").click(function () {
+            i--;
+            if (i < 0) i = 0;
+            RefreshListUser(i);
+        });
+        $("#next").click(function () {
+            i++;
+            RefreshListUser(i);
+        });
+        function RefreshListUser(i) {
+            $.ajax({
+                type: "GET",
+                url: "@Url.Action("_ListUser")",
+                data: {
+                    index: i
+                },
+                dataType: "text",
+                success: function (response) {
+                    $("#listuser").html(response);
+                },
+                failure: function (response) {
+                    alert(response.responseText);
+                },
+                error: function (response) {
+                    alert(response.responseText);
+                }
+            });
         }
-    </tbody>
-</table>
+    });
+</script>
