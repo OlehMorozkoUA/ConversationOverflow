@@ -63,10 +63,10 @@ namespace ConversationOverflowMVC.Controllers
             return Redirect($"/User/LogIn");
         }
         [HttpGet]
-        public async Task<IActionResult> List()
+        public async Task<IActionResult> List(int index = 0, int interval = 10)
         {
             ViewData["Title"] = "List";
-            HttpResponseMessage httpResponseMessage = await _httpClientConversationOverflowAPI.GetAsync("User");
+            HttpResponseMessage httpResponseMessage = await _httpClientConversationOverflowAPI.GetAsync("User/range/" + interval + "/" + index);
 
             if (httpResponseMessage.IsSuccessStatusCode)
             {
@@ -75,6 +75,21 @@ namespace ConversationOverflowMVC.Controllers
                 return View(users);
             }
             else return Redirect($"/User/LogIn?message={httpResponseMessage.StatusCode}");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> _ListUser(int index = 0, int interval = 10)
+        {
+            HttpResponseMessage httpResponseMessage = await _httpClientConversationOverflowAPI.GetAsync("User/range/" + interval + "/" + index);
+
+            if (httpResponseMessage.IsSuccessStatusCode)
+            {
+                List<User> users = await httpResponseMessage.Content.ReadFromJsonAsync<List<User>>();
+
+                return PartialView("_ListUser", users);
+            }
+            else return Redirect($"/User/LogIn?message={httpResponseMessage.StatusCode}");
+            
         }
     }
 }
