@@ -34,7 +34,7 @@ namespace Services.Classes
                 client.DeliveryMethod = SmtpDeliveryMethod.Network;
                 client.UseDefaultCredentials = false;
 
-                client.Credentials = new NetworkCredential("conversationoverflow@outlook.com", "#########################");
+                client.Credentials = new NetworkCredential("conversationoverflow@outlook.com", "############");
 
                 MailMessage msg = new MailMessage("conversationoverflow@outlook.com", email, subject, message);
                 msg.DeliveryNotificationOptions = DeliveryNotificationOptions.OnFailure;
