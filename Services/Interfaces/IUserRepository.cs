@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Models.Classes;
 using Services.Classes;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -11,9 +12,6 @@ namespace Services.Interfaces
         Task<IdentityResult> CreateUserAsync(User user, string password);
         Task<string> GenerateEmailConfirmationTokenAsync(User user);
         Task SendEmailAsync(User user, string callbackUrl);
-        Task<bool> ConfirmEmail(string userId, string code);
-        Task<LogInMessage> LogIn(string login, string password, bool rememberme, string returnUrl);
-        Task LogOut();
         Task<List<User>> GetAllUserAsync();
         Task<List<User>> GetRangeUserAsync(int interval, int index);
         Task<User> GetUserByIdAsync(int id);
@@ -21,5 +19,8 @@ namespace Services.Interfaces
         Task<User> GetUserByEmailAsync(string email);
         Task<List<User>> GetUserByNameAsync(string name);
         Task<List<User>> GetUsersByBirthdayAsync(string birthday);
+        Task UpdateFirstName(string login, string firstname);
+        Task UpdateLastName(string login, string lastname);
+        Task UpdateBirthday(string login, DateTime birthday);
     }
 }

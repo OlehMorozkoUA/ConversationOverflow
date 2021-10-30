@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Models.Classes;
 using Services.Interfaces;
+using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -15,14 +15,11 @@ namespace Services.Classes.Repositories
     {
         private readonly ConversationOverflowDbContext _conversationOverflowDbContext;
         private readonly UserManager<User> _userManager;
-        private readonly SignInManager<User> _signInManager;
         public UserRepository(ConversationOverflowDbContext conversationOverflowDbContext,
-            UserManager<User> userManager,
-            SignInManager<User> signInManager)
+            UserManager<User> userManager)
         {
             _conversationOverflowDbContext = conversationOverflowDbContext;
             _userManager = userManager;
-            _signInManager = signInManager;
         }
         public async Task<IdentityResult> CreateUserAsync(User user, string password)
         {
@@ -45,35 +42,6 @@ namespace Services.Classes.Repositories
                 "Confirm your accout",
                 $"Підтвердіть реєстрацію, перейдіть за посиланням: <a href='{callbackUrl}'>link</a>");
         }
-
-        public async Task<bool> ConfirmEmail(string userId, string code)
-        {
-            if (userId == null || code == null) return false;
-            User user = await _userManager.FindByIdAsync(userId);
-
-            if (user == null) return false;
-            IdentityResult result = await _userManager.ConfirmEmailAsync(user, code);
-
-            if (result.Succeeded) return true;
-            else return false;
-        }
-
-        public async Task<LogInMessage> LogIn(string login, string password, bool rememberme, string returnUrl)
-        {
-            User user = await _userManager.FindByNameAsync(login);
-
-            if (user == null) return new LogInMessage() { IsSuccess = false, Message = "Користувача не існує!" };
-            if (!await _userManager.IsEmailConfirmedAsync(user)) return new LogInMessage() { IsSuccess = false, Message = "Ви не підтвердили пошту!" };
-
-            SignInResult result =
-                await _signInManager.PasswordSignInAsync(login, password, rememberme, false);
-
-            if (result.Succeeded) return new LogInMessage() { IsSuccess = true, Message = returnUrl };
-            else return new LogInMessage() { IsSuccess = false, Message = "Неправильний пароль або логін!" };
-        }
-
-        public async Task LogOut()
-            => await _signInManager.SignOutAsync();
 
         public async Task<List<User>> GetAllUserAsync()
             => await _conversationOverflowDbContext.Users.AsQueryable()
@@ -112,5 +80,31 @@ namespace Services.Classes.Repositories
         public async Task<bool> IsExistEmail(string email)
             => (await GetUserByEmailAsync(email) != null) ? true : false;
 
+        public async Task UpdateFirstName(string login, string firstname)
+        {
+            User user = await _conversationOverflowDbContext.Users.AsQueryable()
+            .Where(user => user.Login == login).FirstOrDefaultAsync();
+
+            user.FirstName = firstname;
+            await _conversationOverflowDbContext.SaveChangesAsync();
+        }
+
+        public async Task UpdateLastName(string login, string lastname)
+        {
+            User user = await _conversationOverflowDbContext.Users.AsQueryable()
+            .Where(user => user.Login == login).FirstOrDefaultAsync();
+
+            user.LastName = lastname;
+            await _conversationOverflowDbContext.SaveChangesAsync();
+        }
+
+        public async Task UpdateBirthday(string login, DateTime birthday)
+        {
+            User user = await _conversationOverflowDbContext.Users.AsQueryable()
+            .Where(user => user.Login == login).FirstOrDefaultAsync();
+
+            user.Birthday = birthday;
+            await _conversationOverflowDbContext.SaveChangesAsync();
+        }
     }
 }

@@ -18,14 +18,12 @@ namespace ConversationOverflowMVC.Controllers
     public class UserController : Controller
     {
         private readonly HttpClient _httpClientConversationOverflowAPI;
-        private readonly IConversationOverflowAPI _conversationOverflowAPI;
         [ViewData]
         public bool IsAuthenticated { get; set; }
         [ViewData]
         public string AuthenticatedUser { get; set; }
         public UserController(IConversationOverflowAPI conversationOverflowAPI)
         {
-            _conversationOverflowAPI = conversationOverflowAPI;
             _httpClientConversationOverflowAPI = conversationOverflowAPI.Initial();
             IsAuthenticated = Convert.ToBoolean(conversationOverflowAPI.IsAuthenticated().Result);
             AuthenticatedUser = conversationOverflowAPI.AuthenticatedUser().Result;
@@ -37,10 +35,36 @@ namespace ConversationOverflowMVC.Controllers
             ViewData["Title"] = "LogIn";
             return View();
         }
+        [HttpGet]
+        public IActionResult Register()
+        {
+            ViewData["Title"] = "Register";
+            return View();
+        }
+        [HttpGet]
+        public async Task<IActionResult> Privacy()
+        {
+            if (IsAuthenticated)
+            {
+                ViewData["Title"] = "Edit";
+                HttpResponseMessage httpResponseMessage =
+                    await _httpClientConversationOverflowAPI.GetAsync("User/login/" + AuthenticatedUser);
+
+                if (httpResponseMessage.IsSuccessStatusCode)
+                {
+                    User user = await httpResponseMessage.Content.ReadFromJsonAsync<User>();
+
+                    return View(user);
+                }
+                else return Redirect($"/User/LogIn?message=Залогуйтеся");
+            }
+            else return Redirect($"/User/LogIn?message=Залогуйтеся");
+        }
         [HttpPost]
         public async Task<IActionResult> LogInService([FromForm] LogInDto logInDto)
         {
-            HttpResponseMessage httpResponseMessage = await _httpClientConversationOverflowAPI.PostAsJsonAsync<LogInDto>("User/LogIn", logInDto);
+            HttpResponseMessage httpResponseMessage = 
+                await _httpClientConversationOverflowAPI.PostAsJsonAsync<LogInDto>("User/LogIn", logInDto);
             LogInMessage message;
 
             if (httpResponseMessage.IsSuccessStatusCode)
@@ -56,6 +80,20 @@ namespace ConversationOverflowMVC.Controllers
             return Redirect($"/User/LogIn?message={message.Message}");
         }
         [HttpPost]
+        public async Task<IActionResult> RegisterService([FromForm] RegisterDto registerDto)
+        {
+            HttpResponseMessage httpResponseMessage = 
+                await _httpClientConversationOverflowAPI.PostAsJsonAsync<RegisterDto>("User/Register", registerDto);
+
+            if (httpResponseMessage.IsSuccessStatusCode)
+            {
+                string msg = await httpResponseMessage.Content.ReadAsStringAsync();
+                if (msg == "true") return Redirect($"/User/LogIn?message=Перевірте електронну пошту {registerDto.Email}");
+            }
+
+            return Redirect($"/User/LogIn?message=Запит не виконано, зверніться до адміністратора.");
+        }
+        [HttpPost]
         public async Task<IActionResult> LogOutService()
         {
             await _httpClientConversationOverflowAPI.PostAsync("User/LogOut", null);
@@ -66,7 +104,8 @@ namespace ConversationOverflowMVC.Controllers
         public async Task<IActionResult> List(int index = 0, int interval = 10)
         {
             ViewData["Title"] = "List";
-            HttpResponseMessage httpResponseMessage = await _httpClientConversationOverflowAPI.GetAsync("User/range/" + interval + "/" + index);
+            HttpResponseMessage httpResponseMessage = 
+                await _httpClientConversationOverflowAPI.GetAsync("User/range/" + interval + "/" + index);
 
             if (httpResponseMessage.IsSuccessStatusCode)
             {
@@ -80,7 +119,8 @@ namespace ConversationOverflowMVC.Controllers
         [HttpGet]
         public async Task<IActionResult> _ListUser(int index = 0, int interval = 10)
         {
-            HttpResponseMessage httpResponseMessage = await _httpClientConversationOverflowAPI.GetAsync("User/range/" + interval + "/" + index);
+            HttpResponseMessage httpResponseMessage = 
+                await _httpClientConversationOverflowAPI.GetAsync("User/range/" + interval + "/" + index);
 
             if (httpResponseMessage.IsSuccessStatusCode)
             {
@@ -90,6 +130,36 @@ namespace ConversationOverflowMVC.Controllers
             }
             else return Redirect($"/User/LogIn?message={httpResponseMessage.StatusCode}");
             
+        }
+
+        [HttpPost]
+        public async Task<bool> UpdateFirstName([FromForm] string firstname)
+        {
+            HttpResponseMessage httpResponseMessage =
+                        await _httpClientConversationOverflowAPI.PutAsync("User/UpdateFirstName", 
+                                    new StringContent(JsonSerializer.Serialize(new { firstname = firstname }), Encoding.UTF8, "application/json"));
+
+            return httpResponseMessage.IsSuccessStatusCode;
+        }
+
+        [HttpPost]
+        public async Task<bool> UpdateLastName([FromForm] string lastname)
+        {
+            HttpResponseMessage httpResponseMessage =
+                        await _httpClientConversationOverflowAPI.PutAsync("User/UpdateLastName",
+                                    new StringContent(JsonSerializer.Serialize(new { lastname = lastname }), Encoding.UTF8, "application/json"));
+
+            return httpResponseMessage.IsSuccessStatusCode;
+        }
+
+        [HttpPost]
+        public async Task<bool> UpdateBirthday([FromForm] DateTime birthday)
+        {
+            HttpResponseMessage httpResponseMessage =
+                        await _httpClientConversationOverflowAPI.PutAsync("User/UpdateBirthday",
+                                    new StringContent(JsonSerializer.Serialize(new { birthday = birthday.ToString("yyyy-M-d") }), Encoding.UTF8, "application/json"));
+
+            return httpResponseMessage.IsSuccessStatusCode;
         }
     }
 }

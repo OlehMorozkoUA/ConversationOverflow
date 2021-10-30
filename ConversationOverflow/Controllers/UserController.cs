@@ -14,6 +14,8 @@ using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Configuration;
 using System.Text;
+using System.Text.Json;
+using System;
 
 namespace ConversationOverflow.Controllers
 {
@@ -79,7 +81,7 @@ namespace ConversationOverflow.Controllers
         [HttpPost]
         [Route("[action]")]
         [AllowAnonymous]
-        public async Task<bool> Register([FromForm] RegisterDto registerDto)
+        public async Task<bool> Register([FromBody] RegisterDto registerDto)
         {
             User user = new User()
             {
@@ -111,18 +113,56 @@ namespace ConversationOverflow.Controllers
         [Route("[action]")]
         [AllowAnonymous]
         public async Task<bool> ConfirmEmail(string userId, string code)
-            => await _users.ConfirmEmail(userId, code);
+        {
+            if (userId == null || code == null) return false;
+            User user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null) return false;
+            IdentityResult result = await _userManager.ConfirmEmailAsync(user, code);
+
+            if (result.Succeeded) return true;
+            else return false;
+        }
 
         [HttpPost]
         [Route("[action]")]
         [AllowAnonymous]
         public async Task<LogInMessage> LogIn([FromBody] LogInDto logInDto)
         {
-            return await _users.LogIn(logInDto.Login, logInDto.Password, logInDto.RememberMe, logInDto.ReturnUrl);
+            User user = await _userManager.FindByNameAsync(logInDto.Login);
+
+            if (user == null) return new LogInMessage() { IsSuccess = false, Message = "Користувача не існує!" };
+            if (!await _userManager.IsEmailConfirmedAsync(user)) return new LogInMessage() { IsSuccess = false, Message = "Ви не підтвердили пошту!" };
+
+            Microsoft.AspNetCore.Identity.SignInResult result =
+                await _signInManager.PasswordSignInAsync(logInDto.Login, logInDto.Password, logInDto.RememberMe, false);
+
+            if (result.Succeeded) return new LogInMessage() { IsSuccess = true, Message = logInDto.ReturnUrl };
+            else return new LogInMessage() { IsSuccess = false, Message = "Неправильний пароль або логін!" };
         }
 
         [HttpPost]
         [Route("[action]")]
-        public async Task LogOut() => await _users.LogOut();
+        public async Task LogOut()
+            => await _signInManager.SignOutAsync();
+
+        [HttpPut]
+        [Route("[action]")]
+        public async Task UpdateFirstName([FromBody] JsonElement body)
+            => await _users.UpdateFirstName(User.Identity.Name, body.GetProperty("firstname").ToString());
+
+        [HttpPut]
+        [Route("[action]")]
+        public async Task UpdateLastName([FromBody] JsonElement body)
+            => await _users.UpdateLastName(User.Identity.Name, body.GetProperty("lastname").ToString());
+
+        [HttpPut]
+        [Route("[action]")]
+        public async Task UpdateBirthday([FromBody] JsonElement body)
+        {
+            DateTime date = DateTime.ParseExact(body.GetProperty("birthday").ToString(), 
+                "yyyy-M-d", System.Globalization.CultureInfo.InvariantCulture);
+            await _users.UpdateBirthday(User.Identity.Name, date);
+        }
     }
 }
