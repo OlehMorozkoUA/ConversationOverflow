@@ -1,0 +1,122 @@
+﻿@using Models.Classes;
+@model User
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<div class="row">
+    <aside class="col-sm-4"></aside>
+    <aside class="col-sm-4">
+        <div class="card">
+            <article class="card-body">
+                <h4 class="card-title text-center mb-4 mt-1">Edition</h4>
+                <hr>
+                <form>
+                    <div class="form-group">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"> <i class="fa fa-user-plus"></i> </span>
+                            </div>
+                            <input value="@Model.FirstName" name="FirstName" id="FirstName" class="form-control" placeholder="first name" type="text" required>
+                            <div style="cursor:pointer;" id="UpdateFirstName" class="btn btn-primary">Update</div>
+                        </div>
+                    </div>
+                </form>
+                <form>
+                    <div class="form-group">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"> <i class="fa fa-user-plus"></i> </span>
+                            </div>
+                            <input value="@Model.LastName" name="LastName" id="LastName" class="form-control" placeholder="last name" type="text" required>
+                            <div style="cursor:pointer;" id="UpdateLastName" class="btn btn-primary">Update</div>
+                        </div>
+                    </div>
+                </form>
+                <form>
+                    <div class="form-group">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"> <i class="fa fa-calendar"></i> </span>
+                            </div>
+                            <input value="@Model.Birthday.ToString("yyyy-MM-dd")" name="Birthday" id="Birthday" class="form-control" placeholder="birthday" type="date" required>
+                            <div style="cursor:pointer;" id="UpdateBirthday" class="btn btn-primary">Update</div>
+                        </div>
+                    </div>
+                </form>
+            </article>
+        </div>
+    </aside>
+    <aside class="col-sm-4"></aside>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $("#UpdateFirstName").click(function () {
+            var oldFirstName = $("#FirstName").val();
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("UpdateFirstName")",
+                data: {
+                    firstname: $("#FirstName").val()
+                },
+                dataType: "text",
+                success: function (response) {
+                    if (response != "true") {
+                        $("#FirstName").val(oldFirstName);
+                    }
+                },
+                failure: function (response) {
+                    alert(response.responseText);
+                },
+                error: function (response) {
+                    alert(response.responseText);
+                }
+            });
+        });
+        $("#UpdateLastName").click(function () {
+            var oldLastName = $("#LastName").val();
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("UpdateLastName")",
+                data: {
+                    lastname: $("#LastName").val()
+                },
+                dataType: "text",
+                success: function (response) {
+                    if (response != "true") {
+                        $("#LastName").val(oldLastName);
+                    }
+                },
+                failure: function (response) {
+                    alert(response.responseText);
+                },
+                error: function (response) {
+                    alert(response.responseText);
+                }
+            });
+        });
+        $("#UpdateBirthday").click(function () {
+            var oldBirthday = $("#Birthday").val();
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("UpdateBirthday")",
+                data: {
+                    birthday: $("#Birthday").val()
+                },
+                dataType: "text",
+                success: function (response) {
+                    if (response != "true") {
+                        $("#Birthday").val(oldBirthday);
+                    }
+                },
+                failure: function (response) {
+                    alert(response.responseText);
+                },
+                error: function (response) {
+                    alert(response.responseText);
+                }
+            });
+        });
+    });
+</script>
