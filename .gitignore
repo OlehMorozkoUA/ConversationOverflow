@@ -5,3 +5,4 @@
 ConversationOverflow.sln
 Services/Classes/Sender.cs
 */wwwroot/content/*
+EmailService.cs
