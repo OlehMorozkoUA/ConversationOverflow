@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ConversationOverflowMVC.Helper;
+using Microsoft.AspNetCore.Http;
 
 namespace ConversationOverflowMVC
 {
@@ -27,6 +28,7 @@ namespace ConversationOverflowMVC
         {
             services.AddControllersWithViews();
             services.AddSingleton<IConversationOverflowAPI, ConversationOverflowAPI>();
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
