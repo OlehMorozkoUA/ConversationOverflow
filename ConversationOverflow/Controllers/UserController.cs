@@ -170,6 +170,11 @@ namespace ConversationOverflow.Controllers
         [Route("[action]")]
         public async Task UpdateImage([FromForm] FileDto fileDto)
         {
+            string folderPath = fileDto.FilePath.Replace(Path.GetFileName(fileDto.FilePath), "");
+            string[] filePaths = Directory.GetFiles(folderPath);
+            foreach (string fp in filePaths)
+                if (fp.Contains(User.Identity.Name)) System.IO.File.Delete(fp);
+
             using (var file = new FileStream(fileDto.FilePath, FileMode.Create))
             {
                 await fileDto.Image.CopyToAsync(file);
