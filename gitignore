@@ -4,4 +4,4 @@
 *.csproj
 ConversationOverflow.sln
 Services/Classes/Sender.cs
-*.png
+*/wwwroot/content/*
