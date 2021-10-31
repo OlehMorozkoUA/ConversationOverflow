@@ -138,6 +138,13 @@ namespace ConversationOverflowMVC.Controllers
             
         }
 
+        [HttpGet]
+        public IActionResult ForgotPassword()
+        {
+            ViewData["Title"] = "Forgot Password";
+            return View();
+        }
+
         [HttpPost]
         public async Task<bool> UpdateFirstName([FromForm] string firstname)
         {
@@ -199,6 +206,16 @@ namespace ConversationOverflowMVC.Controllers
                 }
             }
             else return false;
+        }
+
+        [HttpPost]
+        public async Task<bool> UpdatePhoneNumber([FromForm] string phonenumber)
+        {
+            HttpResponseMessage httpResponseMessage =
+                        await _httpClientConversationOverflowAPI.PutAsync("User/UpdatePhoneNumber",
+                                    new StringContent(JsonSerializer.Serialize(new { phonenumber = phonenumber }), Encoding.UTF8, "application/json"));
+
+            return httpResponseMessage.IsSuccessStatusCode;
         }
     }
 }
