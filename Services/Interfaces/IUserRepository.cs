@@ -23,5 +23,6 @@ namespace Services.Interfaces
         Task UpdateLastName(string login, string lastname);
         Task UpdateBirthday(string login, DateTime birthday);
         Task UpdateImagePath(string login, string imagepath);
+        Task UpdatePhoneNumber(string login, string phonenumber);
     }
 }

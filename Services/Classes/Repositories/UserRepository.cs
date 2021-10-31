@@ -115,5 +115,14 @@ namespace Services.Classes.Repositories
             user.ImagePath = imagepath;
             await _conversationOverflowDbContext.SaveChangesAsync();
         }
+
+        public async Task UpdatePhoneNumber(string login, string phonenumber)
+        {
+            User user = await _conversationOverflowDbContext.Users.AsQueryable()
+            .Where(user => user.Login == login).FirstOrDefaultAsync();
+
+            user.PhoneNumber = phonenumber;
+            await _conversationOverflowDbContext.SaveChangesAsync();
+        }
     }
 }
