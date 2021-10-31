@@ -91,21 +91,25 @@ namespace ConversationOverflow.Controllers
                 FirstName = registerDto.FirstName,
                 LastName = registerDto.LastName,
                 UserName = registerDto.Login,
-                Birthday = registerDto.Birthday
+                Birthday = registerDto.Birthday,
+                ImagePath = "/content/User_default.svg"
             };
 
             IdentityResult result = await _users.CreateUserAsync(user, registerDto.Password);
-
-            if (result.Succeeded)
+            if (result != null)
             {
-                string code = await _users.GenerateEmailConfirmationTokenAsync(user);
-                await _users.SendEmailAsync(user, Url.Action(
-                    "ConfirmEmail",
-                    "User",
-                    new { userId = user.Id, code = code },
-                    protocol: HttpContext.Request.Scheme));
+                if (result.Succeeded)
+                {
+                    string code = await _users.GenerateEmailConfirmationTokenAsync(user);
+                    await _users.SendEmailAsync(user, Url.Action(
+                        "ConfirmEmail",
+                        "User",
+                        new { userId = user.Id, code = code, returnUrl = registerDto.ReturnUrl },
+                        protocol: HttpContext.Request.Scheme));
 
-                return true;
+                    return true;
+                }
+                else return false;
             }
             else return false;
         }
@@ -113,16 +117,24 @@ namespace ConversationOverflow.Controllers
         [HttpGet]
         [Route("[action]")]
         [AllowAnonymous]
-        public async Task<bool> ConfirmEmail(string userId, string code)
+        public async Task<IActionResult> ConfirmEmail(string userId, string code, string returnUrl)
         {
-            if (userId == null || code == null) return false;
+            if (userId == null || code == null) return RedirectPermanent(returnUrl + "?"
+                + System.Net.WebUtility.UrlEncode("message") + "="
+                + System.Net.WebUtility.UrlEncode("пошта непідтверджена."));
             User user = await _userManager.FindByIdAsync(userId);
 
-            if (user == null) return false;
+            if (user == null) return RedirectPermanent(returnUrl + "?"
+                + System.Net.WebUtility.UrlEncode("message") + "="
+                + System.Net.WebUtility.UrlEncode("пошта непідтверджена."));
             IdentityResult result = await _userManager.ConfirmEmailAsync(user, code);
 
-            if (result.Succeeded) return true;
-            else return false;
+            if (result.Succeeded) return RedirectPermanent(returnUrl + "?"
+                + System.Net.WebUtility.UrlEncode("message") + "="
+                + System.Net.WebUtility.UrlEncode("пошта підтверджена."));
+            else return RedirectPermanent(returnUrl + "?"
+                + System.Net.WebUtility.UrlEncode("message") + "="
+                + System.Net.WebUtility.UrlEncode("пошта непідтверджена."));
         }
 
         [HttpPost]
@@ -181,5 +193,10 @@ namespace ConversationOverflow.Controllers
                 await _users.UpdateImagePath(User.Identity.Name, "/content/" + Path.GetFileName(fileDto.FilePath));
             }
         }
+
+        [HttpPut]
+        [Route("[action]")]
+        public async Task UpdatePhoneNumber([FromBody] JsonElement body)
+            => await _users.UpdatePhoneNumber(User.Identity.Name, body.GetProperty("phonenumber").ToString());
     }
 }
