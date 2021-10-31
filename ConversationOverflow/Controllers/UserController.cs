@@ -16,6 +16,7 @@ using Microsoft.Extensions.Configuration;
 using System.Text;
 using System.Text.Json;
 using System;
+using System.IO;
 
 namespace ConversationOverflow.Controllers
 {
@@ -163,6 +164,17 @@ namespace ConversationOverflow.Controllers
             DateTime date = DateTime.ParseExact(body.GetProperty("birthday").ToString(), 
                 "yyyy-M-d", System.Globalization.CultureInfo.InvariantCulture);
             await _users.UpdateBirthday(User.Identity.Name, date);
+        }
+
+        [HttpPut]
+        [Route("[action]")]
+        public async Task UpdateImage([FromForm] FileDto fileDto)
+        {
+            using (var file = new FileStream(fileDto.FilePath, FileMode.Create))
+            {
+                await fileDto.Image.CopyToAsync(file);
+                await _users.UpdateImagePath(User.Identity.Name, "/content/" + Path.GetFileName(fileDto.FilePath));
+            }
         }
     }
 }
