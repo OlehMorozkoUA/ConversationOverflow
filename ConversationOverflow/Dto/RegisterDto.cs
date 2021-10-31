@@ -27,5 +27,7 @@ namespace ConversationOverflow.Dto
         public string PasswordConfirm { get; set; }
         [Required(ErrorMessage = "birthday is required")]
         public DateTime Birthday { get; set; }
+        [Required]
+        public string ReturnUrl { get; set; }
     }
 }
