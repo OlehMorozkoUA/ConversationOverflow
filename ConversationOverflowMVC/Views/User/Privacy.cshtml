@@ -56,6 +56,17 @@
                         </div>
                     </div>
                 </form>
+                <form>
+                    <div class="form-group">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"> <i class="fa fa-phone"></i> </span>
+                            </div>
+                            <input value="@Model.PhoneNumber" name="PhoneNumber" id="PhoneNumber" class="form-control" placeholder="(xxx)-xxx-xxxx" type="tel" required>
+                            <div style="cursor:pointer;" id="UpdatePhoneNumber" class="btn btn-primary">Update</div>
+                        </div>
+                    </div>
+                </form>
             </article>
         </div>
     </aside>
@@ -63,6 +74,7 @@
 </div>
 
 <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.maskedinput/1.4.1/jquery.maskedinput.min.js"></script>
 <script type="text/javascript">
 
     $(document).ready(function () {
@@ -143,6 +155,28 @@
                 processData: false,
                 success: function (response) {
 
+                },
+                failure: function (response) {
+                    alert(response.responseText);
+                },
+                error: function (response) {
+                    alert(response.responseText);
+                }
+            });
+        });
+        $("#UpdatePhoneNumber").click(function () {
+            var oldPhoneNumber = $("#PhoneNumber").val();
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("UpdatePhoneNumber")",
+                data: {
+                    phonenumber: $("#PhoneNumber").val()
+                },
+                dataType: "text",
+                success: function (response) {
+                    if (response != "true") {
+                        $("#PhoneNumber").val(oldPhoneNumber);
+                    }
                 },
                 failure: function (response) {
                     alert(response.responseText);
