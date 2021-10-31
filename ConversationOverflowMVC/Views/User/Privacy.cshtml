@@ -42,6 +42,20 @@
                         </div>
                     </div>
                 </form>
+                <form enctype="multipart/form-data" method="post">
+                    <div class="form-group">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"> <i class="fa fa-file"></i> </span>
+                            </div>
+                            <div class="custom-file">
+                                <input name="Image" id="Image" class="form-control custom-file-input" placeholder="image path" type="file">
+                                <label class="custom-file-label">Choose File...</label>
+                            </div>
+                            <div style="cursor:pointer;" id="UpdateImage" class="btn btn-primary">Update</div>
+                        </div>
+                    </div>
+                </form>
             </article>
         </div>
     </aside>
@@ -109,6 +123,26 @@
                     if (response != "true") {
                         $("#Birthday").val(oldBirthday);
                     }
+                },
+                failure: function (response) {
+                    alert(response.responseText);
+                },
+                error: function (response) {
+                    alert(response.responseText);
+                }
+            });
+        });
+        $("#UpdateImage").click(function () {
+            formData = new FormData();
+            formData.append("image", $("#Image")[0].files[0]);
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("UpdateImage")",
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function (response) {
+
                 },
                 failure: function (response) {
                     alert(response.responseText);
