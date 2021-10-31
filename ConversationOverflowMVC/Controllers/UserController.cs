@@ -21,13 +21,13 @@ namespace ConversationOverflowMVC.Controllers
     public class UserController : Controller
     {
         private readonly HttpClient _httpClientConversationOverflowAPI;
-        private readonly IHostingEnvironment _hostingEnvironment;
+        private readonly IWebHostEnvironment _hostingEnvironment;
         [ViewData]
         public bool IsAuthenticated { get; set; }
         [ViewData]
         public string AuthenticatedUser { get; set; }
         public UserController(IConversationOverflowAPI conversationOverflowAPI,
-               IHostingEnvironment hostingEnvironment)
+               IWebHostEnvironment hostingEnvironment)
         {
             _httpClientConversationOverflowAPI = conversationOverflowAPI.Initial();
             _hostingEnvironment = hostingEnvironment;
@@ -171,30 +171,34 @@ namespace ConversationOverflowMVC.Controllers
         [HttpPost]
         public async Task<bool> UpdateImage([FromForm] IFormFile image)
         {
-            string uploadFolder = Path.Combine(_hostingEnvironment.WebRootPath, "content");
-            string fileName = AuthenticatedUser + "_" + image.FileName;
-            string filePath = Path.Combine(uploadFolder, fileName);
-
-            using (var form = new MultipartFormDataContent())
+            if (image != null)
             {
-                using (var fs = image.OpenReadStream())
+                string uploadFolder = Path.Combine(_hostingEnvironment.WebRootPath, "content");
+                string fileName = AuthenticatedUser + Path.GetExtension(image.FileName);
+                string filePath = Path.Combine(uploadFolder, fileName);
+
+                using (var form = new MultipartFormDataContent())
                 {
-                    using (var streamContent = new StreamContent(fs))
+                    using (var fs = image.OpenReadStream())
                     {
-                        using (var fileContent = new ByteArrayContent(await streamContent.ReadAsByteArrayAsync()))
+                        using (var streamContent = new StreamContent(fs))
                         {
-                            fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse("multipart/form-data");
+                            using (var fileContent = new ByteArrayContent(await streamContent.ReadAsByteArrayAsync()))
+                            {
+                                fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse("multipart/form-data");
 
-                            form.Add(fileContent, "image", Path.GetFileName(filePath));
-                            form.Add(new StringContent(filePath, Encoding.UTF8, "text/xml"), "filepath");
+                                form.Add(fileContent, "image", Path.GetFileName(filePath));
+                                form.Add(new StringContent(filePath, Encoding.UTF8, "text/xml"), "filepath");
 
-                            HttpResponseMessage httpResponseMessage = await _httpClientConversationOverflowAPI.PutAsync("User/UpdateImage", form);
+                                HttpResponseMessage httpResponseMessage = await _httpClientConversationOverflowAPI.PutAsync("User/UpdateImage", form);
 
-                            return httpResponseMessage.IsSuccessStatusCode;
+                                return httpResponseMessage.IsSuccessStatusCode;
+                            }
                         }
                     }
                 }
             }
+            else return false;
         }
     }
 }
