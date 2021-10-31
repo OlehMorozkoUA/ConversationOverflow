@@ -1,1 +1,7 @@
+.vs
+*bin
 *obj
+*.csproj
+ConversationOverflow.sln
+Services/Classes/Sender.cs
+*.png
