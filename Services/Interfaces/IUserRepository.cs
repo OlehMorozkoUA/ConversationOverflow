@@ -22,5 +22,6 @@ namespace Services.Interfaces
         Task UpdateFirstName(string login, string firstname);
         Task UpdateLastName(string login, string lastname);
         Task UpdateBirthday(string login, DateTime birthday);
+        Task UpdateImagePath(string login, string imagepath);
     }
 }

@@ -106,5 +106,14 @@ namespace Services.Classes.Repositories
             user.Birthday = birthday;
             await _conversationOverflowDbContext.SaveChangesAsync();
         }
+
+        public async Task UpdateImagePath(string login, string imagepath)
+        {
+            User user = await _conversationOverflowDbContext.Users.AsQueryable()
+            .Where(user => user.Login == login).FirstOrDefaultAsync();
+
+            user.ImagePath = imagepath;
+            await _conversationOverflowDbContext.SaveChangesAsync();
+        }
     }
 }
