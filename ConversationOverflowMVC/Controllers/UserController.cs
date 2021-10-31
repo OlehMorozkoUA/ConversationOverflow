@@ -12,19 +12,25 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Models.Classes;
+using Microsoft.AspNetCore.Http;
+using System.IO;
+using Microsoft.AspNetCore.Hosting;
 
 namespace ConversationOverflowMVC.Controllers
 {
     public class UserController : Controller
     {
         private readonly HttpClient _httpClientConversationOverflowAPI;
+        private readonly IHostingEnvironment _hostingEnvironment;
         [ViewData]
         public bool IsAuthenticated { get; set; }
         [ViewData]
         public string AuthenticatedUser { get; set; }
-        public UserController(IConversationOverflowAPI conversationOverflowAPI)
+        public UserController(IConversationOverflowAPI conversationOverflowAPI,
+               IHostingEnvironment hostingEnvironment)
         {
             _httpClientConversationOverflowAPI = conversationOverflowAPI.Initial();
+            _hostingEnvironment = hostingEnvironment;
             IsAuthenticated = Convert.ToBoolean(conversationOverflowAPI.IsAuthenticated().Result);
             AuthenticatedUser = conversationOverflowAPI.AuthenticatedUser().Result;
         }
@@ -160,6 +166,35 @@ namespace ConversationOverflowMVC.Controllers
                                     new StringContent(JsonSerializer.Serialize(new { birthday = birthday.ToString("yyyy-M-d") }), Encoding.UTF8, "application/json"));
 
             return httpResponseMessage.IsSuccessStatusCode;
+        }
+
+        [HttpPost]
+        public async Task<bool> UpdateImage([FromForm] IFormFile image)
+        {
+            string uploadFolder = Path.Combine(_hostingEnvironment.WebRootPath, "content");
+            string fileName = AuthenticatedUser + "_" + image.FileName;
+            string filePath = Path.Combine(uploadFolder, fileName);
+
+            using (var form = new MultipartFormDataContent())
+            {
+                using (var fs = image.OpenReadStream())
+                {
+                    using (var streamContent = new StreamContent(fs))
+                    {
+                        using (var fileContent = new ByteArrayContent(await streamContent.ReadAsByteArrayAsync()))
+                        {
+                            fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse("multipart/form-data");
+
+                            form.Add(fileContent, "image", Path.GetFileName(filePath));
+                            form.Add(new StringContent(filePath, Encoding.UTF8, "text/xml"), "filepath");
+
+                            HttpResponseMessage httpResponseMessage = await _httpClientConversationOverflowAPI.PutAsync("User/UpdateImage", form);
+
+                            return httpResponseMessage.IsSuccessStatusCode;
+                        }
+                    }
+                }
+            }
         }
     }
 }
