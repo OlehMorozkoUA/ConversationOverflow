@@ -1,0 +1,8 @@
+﻿@{ 
+    int interval = 3;
+    int total = Convert.ToInt32(ViewData["Count"]);
+}
+@for (int i = 1; i <= interval; i++)
+{
+    <li class="page-item"><a class="page-link" href="#">@i</a></li>
+}
