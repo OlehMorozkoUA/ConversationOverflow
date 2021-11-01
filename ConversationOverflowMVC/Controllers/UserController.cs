@@ -107,7 +107,7 @@ namespace ConversationOverflowMVC.Controllers
             return Redirect($"/User/LogIn");
         }
         [HttpGet]
-        public async Task<IActionResult> List(int index = 0, int interval = 10)
+        public async Task<IActionResult> List(int index = 0, int interval = 7)
         {
             ViewData["Title"] = "List";
             HttpResponseMessage httpResponseMessage = 
@@ -117,13 +117,34 @@ namespace ConversationOverflowMVC.Controllers
             {
                 List<User> users = await httpResponseMessage.Content.ReadFromJsonAsync<List<User>>();
 
-                return View(users);
+                httpResponseMessage = await _httpClientConversationOverflowAPI.GetAsync("User/countpagination/" + interval);
+
+                if (httpResponseMessage.IsSuccessStatusCode)
+                {
+                    string count = await httpResponseMessage.Content.ReadAsStringAsync();
+                    ViewData["Count"] = count;
+                    return View(users);
+                }
+                else return Redirect($"/User/LogIn?message={httpResponseMessage.StatusCode}");
             }
             else return Redirect($"/User/LogIn?message={httpResponseMessage.StatusCode}");
         }
 
         [HttpGet]
-        public async Task<IActionResult> _ListUser(int index = 0, int interval = 10)
+        public async Task<int> GetCountPagination(int interval = 7)
+        {
+            HttpResponseMessage httpResponseMessage = 
+                await _httpClientConversationOverflowAPI.GetAsync("User/countpagination/" + interval);
+
+            if (httpResponseMessage.IsSuccessStatusCode)
+            {
+                return Convert.ToInt32(await httpResponseMessage.Content.ReadAsStringAsync());
+            }
+            else return 0;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> _ListUser(int index = 0, int interval = 7)
         {
             HttpResponseMessage httpResponseMessage = 
                 await _httpClientConversationOverflowAPI.GetAsync("User/range/" + interval + "/" + index);
@@ -143,6 +164,48 @@ namespace ConversationOverflowMVC.Controllers
         {
             ViewData["Title"] = "Forgot Password";
             return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ForgotPasswordService([FromForm] ForgotPasswordDto forgotPasswordDto)
+        {
+            ViewData["Title"] = "Forgot Password";
+            ViewData["Email"] = forgotPasswordDto.Email;
+
+            HttpResponseMessage httpResponseMessage =
+                await _httpClientConversationOverflowAPI.PostAsJsonAsync<ForgotPasswordDto>("User/ForgotPassword", forgotPasswordDto);
+
+            if (httpResponseMessage.IsSuccessStatusCode)
+            {
+                string result = await httpResponseMessage.Content.ReadAsStringAsync();
+
+                return View();
+            }
+            else return Redirect($"/User/LogIn?message=Залогуйтеся");
+        }
+
+        [HttpGet]
+        public IActionResult ResetPassword(string code = null)
+        {
+            ViewData["code"] = code;
+            return View();
+        }
+
+        public async Task<string> ResetPasswordService([FromForm]ResetPasswordDto resetPasswordDto)
+        {
+            HttpResponseMessage httpResponseMessage =
+                await _httpClientConversationOverflowAPI.PostAsJsonAsync<ResetPasswordDto>("User/ChangePassword", resetPasswordDto);
+
+            return await httpResponseMessage.Content.ReadAsStringAsync();
+
+            //if (httpResponseMessage.IsSuccessStatusCode)
+            //{
+            //    string result = await httpResponseMessage.Content.ReadAsStringAsync();
+
+            //    if(Convert.ToBoolean(result)) return Redirect($"/User/LogIn?message=Пароль змінено.");
+            //    else return Redirect($"/User/LogIn?message=Запит не виконано, зверніться до адміністратора.");
+            //}
+            //else return Redirect($"/User/LogIn?message=Запит не виконано, зверніться до адміністратора.");
         }
 
         [HttpPost]
