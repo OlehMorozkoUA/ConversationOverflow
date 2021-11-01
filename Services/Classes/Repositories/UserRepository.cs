@@ -54,6 +54,10 @@ namespace Services.Classes.Repositories
             .Take(interval)
             .ToListAsync();
 
+        public async Task<int> GetCountUserPaginationAsync(int interval)
+            => Convert.ToInt32(
+                Math.Ceiling((await _conversationOverflowDbContext.Users.AsQueryable().CountAsync()) / Convert.ToDouble(interval)));
+
         public async Task<User> GetUserByIdAsync(int id)
             => await _conversationOverflowDbContext.Users.FirstOrDefaultAsync(user => user.Id == id);
         public async Task<User> GetUserByLoginAsync(string login)
