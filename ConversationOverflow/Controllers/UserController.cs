@@ -61,6 +61,10 @@ namespace ConversationOverflow.Controllers
         [Route("range/{interval}/{index}")]
         public async Task<List<User>> GetRange(int interval, int index) => await _users.GetRangeUserAsync(interval, index);
 
+        [HttpGet]
+        [Route("countpagination/{interval}")]
+        public async Task<int> GetCountPagination(int interval) => await _users.GetCountUserPaginationAsync(interval);
+
         [HttpGet("{id:int}")]
         public async Task<User> GetById(int id) => await _users.GetUserByIdAsync(id);
 
@@ -112,6 +116,53 @@ namespace ConversationOverflow.Controllers
                 else return false;
             }
             else return false;
+        }
+
+        [HttpPost]
+        [Route("[action]")]
+        [AllowAnonymous]
+        public async Task<bool> ForgotPassword([FromBody] ForgotPasswordDto forgotPasswordDto)
+        {
+            User user = await _users.GetUserByEmailAsync(forgotPasswordDto.Email);
+            string code = await _users.GenerateEmailConfirmationTokenAsync(user);
+            await _users.SendEmailAsync(user, Url.Action(
+                "ResetPassword",
+                "User",
+                new { userId = user.Id, code = code, returnUrl = forgotPasswordDto.ReturnUrl },
+                protocol: HttpContext.Request.Scheme));
+
+            return true;
+        }
+
+        [HttpGet]
+        [Route("[action]")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ResetPassword(string userId, string code, string returnUrl)
+        {
+            if (userId == null || code == null) Redirect(returnUrl.Replace("/User/ResetPassword", "/User/LogIn"));
+            User user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null) return Redirect(returnUrl.Replace("/User/ResetPassword", "/User/LogIn"));
+            IdentityResult result = await _userManager.ConfirmEmailAsync(user, code);
+
+            if (result.Succeeded) return Redirect(returnUrl + "?"
+                + System.Net.WebUtility.UrlEncode("code") + "="
+                + System.Net.WebUtility.UrlEncode(code));
+            else return Redirect(returnUrl.Replace("/User/ResetPassword", "/User/LogIn"));
+        }
+
+        [HttpPost]
+        [Route("[action]")]
+        [AllowAnonymous]
+        public async Task<string> ChangePassword([FromBody]ResetPasswordDto resetPasswordDto)
+        {
+            User user = await _users.GetUserByEmailAsync(resetPasswordDto.Email);
+            if (user != null)
+            {
+                var result = await _userManager.ResetPasswordAsync(user, resetPasswordDto.Code, resetPasswordDto.Password);
+                return result.Succeeded.ToString() + ", " + resetPasswordDto.Code + ", " + resetPasswordDto.Password;
+            }
+            return "user null";
         }
 
         [HttpGet]
