@@ -240,6 +240,8 @@
         $("#Search").on("input", function () {
             if ($("#Search").val() != "")
                 RefreshListUserByName($("#Search").val(), 0);
+            else
+                RefreshListUser(0);
         });
         function RefreshListUser(index) {
             $.ajax({
