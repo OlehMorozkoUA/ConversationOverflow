@@ -48,11 +48,27 @@ namespace Services.Classes.Repositories
             .OrderBy(user => (user.FirstName + user.LastName))
             .ToListAsync();
         public async Task<List<User>> GetRangeUserAsync(int interval, int index)
-            => await _conversationOverflowDbContext.Users.AsQueryable()
+            => await GetRangeUserQueryable(interval, index).ToListAsync();
+
+        protected IQueryable<User> GetRangeUserQueryable(int interval, int index)
+            => _conversationOverflowDbContext.Users.AsQueryable()
             .OrderBy(user => (user.FirstName + user.LastName))
             .Skip(index * interval)
-            .Take(interval)
+            .Take(interval);
+
+        public async Task<List<User>> GetRangeUserByNameAsync(string name, int interval, int index)
+            => await GetRangeUserByNameQueryable(name, interval, index)
             .ToListAsync();
+
+        protected IQueryable<User> GetRangeUserByNameQueryable(string name, int interval, int index)
+            => _conversationOverflowDbContext.Users.AsQueryable()
+            .Where(user => (user.FirstName.Contains(name.Trim()) && user.FirstName.StartsWith(name.Trim())) ||
+                  (user.LastName.Contains(name.Trim()) && user.LastName.StartsWith(name.Trim())) ||
+                  ((user.FirstName + " " + user.LastName).Contains(name.Trim()) && (user.FirstName + " " + user.LastName).StartsWith(name.Trim())) ||
+                  ((user.LastName + " " + user.FirstName).Contains(name.Trim()) && (user.LastName + " " + user.FirstName).StartsWith(name.Trim())))
+            .OrderBy(user => (user.FirstName + user.LastName))
+            .Skip(index * interval)
+            .Take(interval);
 
         public async Task<int> GetCountUserPaginationAsync(int interval)
             => Convert.ToInt32(
@@ -65,13 +81,17 @@ namespace Services.Classes.Repositories
         public async Task<User> GetUserByEmailAsync(string email)
             => await _conversationOverflowDbContext.Users.FirstOrDefaultAsync(user => user.Email == email);
         public async Task<List<User>> GetUserByNameAsync(string name)
-            => await _conversationOverflowDbContext.Users.AsQueryable()
-                .Where(user => (user.FirstName.Contains(name.Trim()) && user.FirstName.StartsWith(name.Trim())) || 
+            => await GetUserByNameQueryable(name)
+                .ToListAsync();
+
+        protected IQueryable<User> GetUserByNameQueryable(string name)
+            => _conversationOverflowDbContext.Users.AsQueryable()
+                .Where(user => (user.FirstName.Contains(name.Trim()) && user.FirstName.StartsWith(name.Trim())) ||
                                (user.LastName.Contains(name.Trim()) && user.LastName.StartsWith(name.Trim())) ||
                                ((user.FirstName + " " + user.LastName).Contains(name.Trim()) && (user.FirstName + " " + user.LastName).StartsWith(name.Trim())) ||
                                ((user.LastName + " " + user.FirstName).Contains(name.Trim()) && (user.LastName + " " + user.FirstName).StartsWith(name.Trim())))
-                .OrderBy(user => user.FirstName)
-                .ToListAsync(); 
+                .OrderBy(user => user.FirstName);
+
         public async Task<List<User>> GetUsersByBirthdayAsync(string birthday)
             => await _conversationOverflowDbContext.Users.AsQueryable()
                 .Where(user => (user.Birthday.Year.ToString()+"-"+

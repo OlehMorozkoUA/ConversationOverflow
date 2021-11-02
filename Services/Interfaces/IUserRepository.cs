@@ -25,5 +25,6 @@ namespace Services.Interfaces
         Task UpdateImagePath(string login, string imagepath);
         Task UpdatePhoneNumber(string login, string phonenumber);
         Task<int> GetCountUserPaginationAsync(int interval);
+        Task<List<User>> GetRangeUserByNameAsync(string name, int interval, int index);
     }
 }
