@@ -12,7 +12,7 @@
                     <div class="px-4 d-none d-md-block">
                         <div class="d-flex align-items-center">
                             <div class="flex-grow-1">
-                                <input type="text" class="form-control my-3" placeholder="Search...">
+                                <input id="Search" type="text" class="form-control my-3" placeholder="Search...">
                             </div>
                         </div>
                     </div>
@@ -219,20 +219,34 @@
         $("#previous").click(function () {
             i--;
             if (i < 0) i = 0;
-            RefreshListUser(i);
+            if ($("#Search").val() != "") {
+                RefreshListUserByName($("#Search").val(), i);
+            } else {
+                RefreshListUser(i);
+            }
         });
         $("#next").click(function () {
             i++;
-            max = GetCountPagination() - 1;
-            if (i > max) i = max;
-            RefreshListUser(i);
+            if ($("#Search").val() != "") {
+                max = GetCountPaginationByName($("#Search").val()) - 1;
+                if (i > max) i = max;
+                RefreshListUserByName($("#Search").val(), i);
+            } else {
+                max = GetCountPagination() - 1;
+                if (i > max) i = max;
+                RefreshListUser(i);
+            }
         });
-        function RefreshListUser(i) {
+        $("#Search").on("input", function () {
+            if ($("#Search").val() != "")
+                RefreshListUserByName($("#Search").val(), 0);
+        });
+        function RefreshListUser(index) {
             $.ajax({
                 type: "GET",
                 url: "@Url.Action("_ListUser")",
                 data: {
-                    index: i
+                    index: index
                 },
                 dataType: "text",
                 success: function (response) {
@@ -246,14 +260,57 @@
                 }
             });
         }
-        function GetCountPagination() {
+        function RefreshListUserByName(name, index) {
+            $.ajax({
+                type: "GET",
+                url: "@Url.Action("_ListUser")",
+                data: {
+                    name: name,
+                    index: index
+                },
+                dataType: "text",
+                success: function (response) {
+                        $("#listuser").html(response);
+                },
+                failure: function (response) {
+                    alert(response.responseText);
+                },
+                error: function (response) {
+                    alert(response.responseText);
+                }
+            });
+        }
+        function GetCountPagination(interval = 7) {
             var result = 0;
             $.ajax({
                 async: false,
                 type: "GET",
                 url: "@Url.Action("GetCountPagination")",
                 data: {
-                    index: i
+                    interval: interval
+                },
+                dataType: "text",
+                success: function (response) {
+                    result = response;
+                },
+                failure: function (response) {
+                    alert(response.responseText);
+                },
+                error: function (response) {
+                    alert(response.responseText);
+                }
+            });
+            return result;
+        }
+        function GetCountPaginationByName(name, interval = 7) {
+            var result = 0;
+            $.ajax({
+                async: false,
+                type: "GET",
+                url: "@Url.Action("GetCountPagination")",
+                data: {
+                    name: name,
+                    interval: interval
                 },
                 dataType: "text",
                 success: function (response) {
