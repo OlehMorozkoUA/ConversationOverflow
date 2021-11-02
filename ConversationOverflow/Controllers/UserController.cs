@@ -62,6 +62,11 @@ namespace ConversationOverflow.Controllers
         public async Task<List<User>> GetRange(int interval, int index) => await _users.GetRangeUserAsync(interval, index);
 
         [HttpGet]
+        [Route("rangebyname/{name}/{interval}/{index}")]
+        public async Task<List<User>> GetRangeByName(string name, int interval, int index)
+            => await _users.GetRangeUserByNameAsync(name, interval, index);
+
+        [HttpGet]
         [Route("countpagination/{interval}")]
         public async Task<int> GetCountPagination(int interval) => await _users.GetCountUserPaginationAsync(interval);
 
