@@ -131,10 +131,15 @@ namespace ConversationOverflowMVC.Controllers
         }
 
         [HttpGet]
-        public async Task<int> GetCountPagination(int interval = 7)
+        public async Task<int> GetCountPagination(string name = "", int interval = 7)
         {
-            HttpResponseMessage httpResponseMessage = 
-                await _httpClientConversationOverflowAPI.GetAsync("User/countpagination/" + interval);
+
+            HttpResponseMessage httpResponseMessage;
+
+            if (name == "") httpResponseMessage =
+                                await _httpClientConversationOverflowAPI.GetAsync("User/countpagination/" + interval);
+            else httpResponseMessage =
+                     await _httpClientConversationOverflowAPI.GetAsync("User/countpagination/" + name + "/" + interval);
 
             if (httpResponseMessage.IsSuccessStatusCode)
             {
@@ -144,10 +149,15 @@ namespace ConversationOverflowMVC.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> _ListUser(int index = 0, int interval = 7)
+        public async Task<IActionResult> _ListUser(string name = "", int index = 0, int interval = 7)
         {
-            HttpResponseMessage httpResponseMessage = 
-                await _httpClientConversationOverflowAPI.GetAsync("User/range/" + interval + "/" + index);
+            HttpResponseMessage httpResponseMessage;
+
+            if (name == "") httpResponseMessage =
+                    await _httpClientConversationOverflowAPI.GetAsync("User/range/" + interval + "/" + index);
+            else httpResponseMessage =
+                    await _httpClientConversationOverflowAPI.GetAsync("User/rangebyname/" + name + "/" + interval + "/" + index);
+
 
             if (httpResponseMessage.IsSuccessStatusCode)
             {
@@ -156,7 +166,6 @@ namespace ConversationOverflowMVC.Controllers
                 return PartialView("_ListUser", users);
             }
             else return Redirect($"/User/LogIn?message={httpResponseMessage.StatusCode}");
-            
         }
 
         [HttpGet]

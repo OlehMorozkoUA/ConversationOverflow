@@ -70,6 +70,10 @@ namespace ConversationOverflow.Controllers
         [Route("countpagination/{interval}")]
         public async Task<int> GetCountPagination(int interval) => await _users.GetCountUserPaginationAsync(interval);
 
+        [HttpGet]
+        [Route("countpagination/{name}/{interval}")]
+        public async Task<int> GetCountPagination(string name, int interval) => await _users.GetCountUserPaginationAsync(name, interval);
+
         [HttpGet("{id:int}")]
         public async Task<User> GetById(int id) => await _users.GetUserByIdAsync(id);
 
