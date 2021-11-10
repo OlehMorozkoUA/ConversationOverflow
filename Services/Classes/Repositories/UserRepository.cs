@@ -45,8 +45,11 @@ namespace Services.Classes.Repositories
 
         public async Task<List<User>> GetAllUserAsync()
             => await _conversationOverflowDbContext.Users.AsQueryable()
-            .OrderBy(user => (user.FirstName + user.LastName))
-            .ToListAsync();
+                .OrderBy(user => (user.FirstName + user.LastName))
+                .ToListAsync();
+
+
+
         public async Task<List<User>> GetRangeUserAsync(int interval, int index)
             => await GetRangeUserQueryable(interval, index).ToListAsync();
 
@@ -103,6 +106,10 @@ namespace Services.Classes.Repositories
                                 user.Birthday.Day.ToString()) == birthday)
                 .OrderBy(user => user.Birthday)
                 .ToListAsync();
+        public async Task<Location> GetLocationAsync(int id)
+            => await _conversationOverflowDbContext.Locations.AsQueryable()
+            .Where(location => location.UserId == id)
+            .FirstOrDefaultAsync();
         public async Task<bool> IsExistLogin(string login)
             => (await GetUserByLoginAsync(login) != null) ? true : false;
         public async Task<bool> IsExistEmail(string email)

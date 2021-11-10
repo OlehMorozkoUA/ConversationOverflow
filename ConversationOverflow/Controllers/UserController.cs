@@ -27,18 +27,21 @@ namespace ConversationOverflow.Controllers
     {
         private readonly ILogger<UserController> _logger;
         private readonly IUserRepository _users;
+        private readonly ILocationRepository _locations;
         private readonly IConfiguration _configuration;
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
 
         public UserController(ILogger<UserController> logger, 
             IUserRepository users,
+            ILocationRepository locations,
             IConfiguration configuration,
             UserManager<User> userManager,
             SignInManager<User> signInManager)
         {
             _logger = logger;
             _users = users;
+            _locations = locations;
             _configuration = configuration;
             _userManager = userManager;
             _signInManager = signInManager;
@@ -91,7 +94,11 @@ namespace ConversationOverflow.Controllers
         [HttpGet]
         [Route("birthday/{birthday}")]
         public async Task<List<User>> GetByBirthday(string birthday) => await _users.GetUsersByBirthdayAsync(birthday);
-        
+
+        [HttpGet]
+        [Route("location/{userId}")]
+        public async Task<Location> GetLocationByUserId(int userId) => await _locations.GetLocationByUserIdAsync(userId);
+
         [HttpPost]
         [Route("[action]")]
         [AllowAnonymous]
@@ -219,24 +226,34 @@ namespace ConversationOverflow.Controllers
         public async Task LogOut()
             => await _signInManager.SignOutAsync();
 
-        [HttpPut]
+        [HttpPost]
         [Route("[action]")]
-        public async Task UpdateFirstName([FromBody] JsonElement body)
-            => await _users.UpdateFirstName(User.Identity.Name, body.GetProperty("firstname").ToString());
-
-        [HttpPut]
-        [Route("[action]")]
-        public async Task UpdateLastName([FromBody] JsonElement body)
-            => await _users.UpdateLastName(User.Identity.Name, body.GetProperty("lastname").ToString());
-
-        [HttpPut]
-        [Route("[action]")]
-        public async Task UpdateBirthday([FromBody] JsonElement body)
+        public async Task AddLocation([FromBody] LocationDto locationDto)
         {
-            DateTime date = DateTime.ParseExact(body.GetProperty("birthday").ToString(), 
-                "yyyy-M-d", System.Globalization.CultureInfo.InvariantCulture);
-            await _users.UpdateBirthday(User.Identity.Name, date);
+            User user = await GetByLogin(User.Identity.Name);
+            await _locations.AddLocationAsync(user.Id, new Location()
+            {
+                Country = locationDto.Country,
+                Region = locationDto.Region,
+                Address = locationDto.Address,
+                Postcode = locationDto.Postcode
+            });
         }
+
+        [HttpPut]
+        [Route("[action]")]
+        public async Task UpdateFirstName([FromBody] ProfileDto profileDto)
+            => await _users.UpdateFirstName(User.Identity.Name, profileDto.FirstName);
+
+        [HttpPut]
+        [Route("[action]")]
+        public async Task UpdateLastName([FromBody] ProfileDto profileDto)
+            => await _users.UpdateLastName(User.Identity.Name, profileDto.LastName);
+
+        [HttpPut]
+        [Route("[action]")]
+        public async Task UpdateBirthday([FromBody] ProfileDto profileDto)
+            => await _users.UpdateBirthday(User.Identity.Name, profileDto.Birthday);
 
         [HttpPut]
         [Route("[action]")]
@@ -256,7 +273,35 @@ namespace ConversationOverflow.Controllers
 
         [HttpPut]
         [Route("[action]")]
-        public async Task UpdatePhoneNumber([FromBody] JsonElement body)
-            => await _users.UpdatePhoneNumber(User.Identity.Name, body.GetProperty("phonenumber").ToString());
+        public async Task UpdatePhoneNumber([FromBody] ProfileDto profileDto)
+            => await _users.UpdatePhoneNumber(User.Identity.Name, profileDto.PhoneNumber);
+
+        [HttpPut]
+        [Route("[action]")]
+        public async Task UpdateLocation([FromBody] LocationDto locationDto)
+        {
+            User user = await GetByLogin(User.Identity.Name);
+            Location location = await _locations.GetLocationByUserIdAsync(user.Id);
+            Location newLocation = new Location()
+            {
+                Country = locationDto.Country,
+                Region = locationDto.Region,
+                Address = locationDto.Address,
+                Postcode = locationDto.Postcode
+            };
+
+            if (location != null)
+            {
+                newLocation = new Location()
+                {
+                    Country = (location.Country != null) ? location.Country : locationDto.Country,
+                    Region = (location.Region != null) ? location.Region : locationDto.Region,
+                    Address = (location.Address != null) ? location.Address : locationDto.Address,
+                    Postcode = (location.Postcode != 0) ? location.Postcode : locationDto.Postcode
+                };
+                await _locations.UpdateLocationAsync(user.Id, newLocation);
+            }
+            else await _locations.AddLocationAsync(user.Id, newLocation);
+        }
     }
 }

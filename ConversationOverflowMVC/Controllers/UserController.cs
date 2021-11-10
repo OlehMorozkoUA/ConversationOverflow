@@ -60,6 +60,17 @@ namespace ConversationOverflowMVC.Controllers
                 {
                     User user = await httpResponseMessage.Content.ReadFromJsonAsync<User>();
 
+                    httpResponseMessage =
+                        await _httpClientConversationOverflowAPI.GetAsync("User/location/" + user.Id);
+
+                    if (httpResponseMessage.IsSuccessStatusCode)
+                    {
+                        Location location = await httpResponseMessage.Content.ReadFromJsonAsync<Location>();
+
+                        user.Location = location;
+                    }
+                    else user.Location = new Location();
+
                     return View(user);
                 }
                 else return Redirect($"/User/LogIn?message=Залогуйтеся");
@@ -286,6 +297,15 @@ namespace ConversationOverflowMVC.Controllers
             HttpResponseMessage httpResponseMessage =
                         await _httpClientConversationOverflowAPI.PutAsync("User/UpdatePhoneNumber",
                                     new StringContent(JsonSerializer.Serialize(new { phonenumber = phonenumber }), Encoding.UTF8, "application/json"));
+
+            return httpResponseMessage.IsSuccessStatusCode;
+        }
+
+        [HttpPost]
+        public async Task<bool> UpdateLocation([FromForm] LocationDto locationDto)
+        {
+            HttpResponseMessage httpResponseMessage =
+                await _httpClientConversationOverflowAPI.PutAsJsonAsync("User/UpdateLocation", locationDto);
 
             return httpResponseMessage.IsSuccessStatusCode;
         }
