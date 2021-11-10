@@ -73,8 +73,8 @@
                             <div class="input-group-prepend">
                                 <span class="input-group-text"> <i class="fa fa-flag"></i> </span>
                             </div>
-                            <input value="" name="Country" id="Country" class="form-control" placeholder="country" type="text" required>
-                            <div style="cursor:pointer;" id="UpdateCountry" class="btn btn-primary">Update</div>
+                            <input value="@Model.Location.Country" name="Country" id="Country" class="form-control" placeholder="country" type="text" required>
+                            <div style="cursor:pointer;" name="UpdateLocation" data-update="Country" class="btn btn-primary">Update</div>
                         </div>
                     </div>
                 </form>
@@ -84,8 +84,8 @@
                             <div class="input-group-prepend">
                                 <span class="input-group-text"> <i class="fa fa-area-chart"></i> </span>
                             </div>
-                            <input value="" name="Region" id="Region" class="form-control" placeholder="region" type="text" required>
-                            <div style="cursor:pointer;" id="UpdateRegion" class="btn btn-primary">Update</div>
+                            <input value="@Model.Location.Region" name="Region" id="Region" class="form-control" placeholder="region" type="text" required>
+                            <div style="cursor:pointer;" name="UpdateLocation" data-update="Region" class="btn btn-primary">Update</div>
                         </div>
                     </div>
                 </form>
@@ -95,8 +95,8 @@
                             <div class="input-group-prepend">
                                 <span class="input-group-text"> <i class="fa fa-address-card"></i> </span>
                             </div>
-                            <input value="" name="Address" id="Address" class="form-control" placeholder="address" type="text" required>
-                            <div style="cursor:pointer;" id="UpdateAddress" class="btn btn-primary">Update</div>
+                            <input value="@Model.Location.Address" name="Address" id="Address" class="form-control" placeholder="address" type="text" required>
+                            <div style="cursor:pointer;" name="UpdateLocation" data-update="Address" class="btn btn-primary">Update</div>
                         </div>
                     </div>
                 </form>
@@ -106,8 +106,8 @@
                             <div class="input-group-prepend">
                                 <span class="input-group-text"> <i class="fa fa-address-card"></i> </span>
                             </div>
-                            <input value="" name="Postcode" id="Postcode" class="form-control" placeholder="postcode" type="text" required>
-                            <div style="cursor:pointer;" id="UpdatePostcode" class="btn btn-primary">Update</div>
+                            <input value="@Model.Location.Postcode" name="Postcode" id="Postcode" class="form-control" placeholder="postcode" type="text" required>
+                            <div style="cursor:pointer;" name="UpdateLocation" data-update="Postcode" class="btn btn-primary">Update</div>
                         </div>
                     </div>
                 </form>
@@ -221,6 +221,30 @@
                     if (response != "true") {
                         $("#PhoneNumber").val(oldPhoneNumber);
                     }
+                },
+                failure: function (response) {
+                    alert(response.responseText);
+                },
+                error: function (response) {
+                    alert(response.responseText);
+                }
+            });
+        });
+        $("div[name=UpdateLocation]").on("click", function (event) {
+            let button = event.target;
+
+            var variable = button.getAttribute("data-update");
+            var value = $("#" + button.getAttribute("data-update")).val();
+
+            var data = JSON.parse("{\"" + variable + "\":\"" + value + "\"}");
+
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("UpdateLocation")",
+                data: data,
+                dataType: "text",
+                success: function (response) {
+                    
                 },
                 failure: function (response) {
                     alert(response.responseText);
