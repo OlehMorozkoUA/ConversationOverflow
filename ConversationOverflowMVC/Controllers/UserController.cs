@@ -60,16 +60,7 @@ namespace ConversationOverflowMVC.Controllers
                 {
                     User user = await httpResponseMessage.Content.ReadFromJsonAsync<User>();
 
-                    httpResponseMessage =
-                        await _httpClientConversationOverflowAPI.GetAsync("User/location/" + user.Id);
-
-                    if (httpResponseMessage.IsSuccessStatusCode)
-                    {
-                        Location location = await httpResponseMessage.Content.ReadFromJsonAsync<Location>();
-
-                        user.Location = location;
-                    }
-                    else user.Location = new Location();
+                    if (user.Location == null) user.Location = new Location();
 
                     return View(user);
                 }

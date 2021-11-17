@@ -28,21 +28,18 @@ namespace ConversationOverflow.Controllers
         private readonly ILogger<UserController> _logger;
         private readonly IUserRepository _users;
         private readonly ILocationRepository _locations;
-        private readonly IConfiguration _configuration;
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
 
         public UserController(ILogger<UserController> logger, 
             IUserRepository users,
             ILocationRepository locations,
-            IConfiguration configuration,
             UserManager<User> userManager,
             SignInManager<User> signInManager)
         {
             _logger = logger;
             _users = users;
             _locations = locations;
-            _configuration = configuration;
             _userManager = userManager;
             _signInManager = signInManager;
         }
@@ -294,14 +291,17 @@ namespace ConversationOverflow.Controllers
             {
                 newLocation = new Location()
                 {
-                    Country = (location.Country != null) ? location.Country : locationDto.Country,
-                    Region = (location.Region != null) ? location.Region : locationDto.Region,
-                    Address = (location.Address != null) ? location.Address : locationDto.Address,
-                    Postcode = (location.Postcode != 0) ? location.Postcode : locationDto.Postcode
+                    Country = (locationDto.Country == null) ? location.Country : locationDto.Country,
+                    Region = (locationDto.Region == null) ? location.Region : locationDto.Region,
+                    Address = (locationDto.Address == null) ? location.Address : locationDto.Address,
+                    Postcode = (locationDto.Postcode == 0) ? location.Postcode : locationDto.Postcode
                 };
                 await _locations.UpdateLocationAsync(user.Id, newLocation);
             }
-            else await _locations.AddLocationAsync(user.Id, newLocation);
+            else
+            {
+                await _locations.AddLocationAsync(user.Id, newLocation);
+            }
         }
     }
 }

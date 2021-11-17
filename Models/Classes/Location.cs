@@ -1,6 +1,4 @@
 ﻿using Models.Interfaces;
-using System;
-using System.Threading.Tasks;
 
 namespace Models.Classes
 {
@@ -11,11 +9,8 @@ namespace Models.Classes
         public string Region { get; set; }
         public string Address { get; set; }
         public int Postcode { get; set; }
-        public int UserId { get; set; }
 
-        public Task<Location> Take()
-        {
-            throw new NotImplementedException();
-        }
+        public int UserId { get; set; }
+        public User User { get; set; }
     }
 }
