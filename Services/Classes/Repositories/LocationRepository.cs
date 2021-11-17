@@ -14,7 +14,7 @@ namespace Services.Classes.Repositories
             _conversationOverflowDbContext = conversationOverflowDbContext;
         }
         public async Task<Location> GetLocationByUserIdAsync(int userId)
-            => await _conversationOverflowDbContext.Locations.FirstOrDefaultAsync(location => location.UserId == userId);
+            => await _conversationOverflowDbContext.Locations.Include(location => location.User).FirstOrDefaultAsync(location => location.UserId == userId);
 
         public async Task AddLocationAsync(int userId, Location location)
         {

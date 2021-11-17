@@ -45,6 +45,7 @@ namespace Services.Classes.Repositories
 
         public async Task<List<User>> GetAllUserAsync()
             => await _conversationOverflowDbContext.Users.AsQueryable()
+                .Include(user => user.Location)
                 .OrderBy(user => (user.FirstName + user.LastName))
                 .ToListAsync();
 
@@ -55,6 +56,7 @@ namespace Services.Classes.Repositories
 
         protected IQueryable<User> GetRangeUserQueryable(int interval, int index)
             => _conversationOverflowDbContext.Users.AsQueryable()
+            .Include(user => user.Location)
             .OrderBy(user => (user.FirstName + user.LastName))
             .Skip(index * interval)
             .Take(interval);
@@ -65,6 +67,7 @@ namespace Services.Classes.Repositories
 
         protected IQueryable<User> GetRangeUserByNameQueryable(string name, int interval, int index)
             => _conversationOverflowDbContext.Users.AsQueryable()
+            .Include(user => user.Location)
             .Where(user => (user.FirstName.Contains(name.Trim()) && user.FirstName.StartsWith(name.Trim())) ||
                   (user.LastName.Contains(name.Trim()) && user.LastName.StartsWith(name.Trim())) ||
                   ((user.FirstName + " " + user.LastName).Contains(name.Trim()) && (user.FirstName + " " + user.LastName).StartsWith(name.Trim())) ||
@@ -82,17 +85,18 @@ namespace Services.Classes.Repositories
                 Math.Ceiling((await GetUserByNameQueryable(name).CountAsync()) / Convert.ToDouble(interval)));
 
         public async Task<User> GetUserByIdAsync(int id)
-            => await _conversationOverflowDbContext.Users.FirstOrDefaultAsync(user => user.Id == id);
+            => await _conversationOverflowDbContext.Users.Include(user => user.Location).FirstOrDefaultAsync(user => user.Id == id);
         public async Task<User> GetUserByLoginAsync(string login)
-            => await _conversationOverflowDbContext.Users.FirstOrDefaultAsync(user => user.Login == login);
+            => await _conversationOverflowDbContext.Users.Include(user => user.Location).FirstOrDefaultAsync(user => user.Login == login);
         public async Task<User> GetUserByEmailAsync(string email)
-            => await _conversationOverflowDbContext.Users.FirstOrDefaultAsync(user => user.Email == email);
+            => await _conversationOverflowDbContext.Users.Include(user => user.Location).FirstOrDefaultAsync(user => user.Email == email);
         public async Task<List<User>> GetUserByNameAsync(string name)
             => await GetUserByNameQueryable(name)
                 .ToListAsync();
 
         protected IQueryable<User> GetUserByNameQueryable(string name)
             => _conversationOverflowDbContext.Users.AsQueryable()
+                .Include(user => user.Location)
                 .Where(user => (user.FirstName.Contains(name.Trim()) && user.FirstName.StartsWith(name.Trim())) ||
                                (user.LastName.Contains(name.Trim()) && user.LastName.StartsWith(name.Trim())) ||
                                ((user.FirstName + " " + user.LastName).Contains(name.Trim()) && (user.FirstName + " " + user.LastName).StartsWith(name.Trim())) ||
@@ -101,6 +105,7 @@ namespace Services.Classes.Repositories
 
         public async Task<List<User>> GetUsersByBirthdayAsync(string birthday)
             => await _conversationOverflowDbContext.Users.AsQueryable()
+                .Include(user => user.Location)
                 .Where(user => (user.Birthday.Year.ToString()+"-"+
                                 user.Birthday.Month.ToString()+"-"+
                                 user.Birthday.Day.ToString()) == birthday)
@@ -108,6 +113,7 @@ namespace Services.Classes.Repositories
                 .ToListAsync();
         public async Task<Location> GetLocationAsync(int id)
             => await _conversationOverflowDbContext.Locations.AsQueryable()
+            .Include(location => location.User)
             .Where(location => location.UserId == id)
             .FirstOrDefaultAsync();
         public async Task<bool> IsExistLogin(string login)
