@@ -59,8 +59,10 @@ namespace ConversationOverflow
                 })
                 .AddEntityFrameworkStores<ConversationOverflowDbContext>()
                 .AddDefaultTokenProviders();
+            services.AddControllers().AddNewtonsoftJson(x => x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IGroupRepository, GroupRepository>();
             services.AddScoped<ILocationRepository, LocationRepository>();
         }
 
