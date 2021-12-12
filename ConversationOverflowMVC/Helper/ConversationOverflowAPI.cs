@@ -8,16 +8,17 @@ namespace ConversationOverflowMVC.Helper
 {
     public class ConversationOverflowAPI : IConversationOverflowAPI
     {
-        private HttpClient httpClient;
-        public ConversationOverflowAPI()
+        private readonly HttpClient _httpClient;
+        public ConversationOverflowAPI(HttpClient httpClient)
         {
-            httpClient = new HttpClient();
-            httpClient.BaseAddress = new Uri("https://localhost:5001");
+            _httpClient = httpClient;
+            _httpClient.BaseAddress = new Uri("https://localhost:5001");
+            _httpClient.Timeout = TimeSpan.FromSeconds(3000);
         }
-        public HttpClient Initial() => httpClient;
+        public HttpClient Initial() => _httpClient;
         public async Task<string> IsAuthenticated()
         {
-            HttpResponseMessage httpResponseMessage = await httpClient.GetAsync("User/IsAuthenticated");
+            HttpResponseMessage httpResponseMessage = await _httpClient.GetAsync("User/IsAuthenticated");
 
             if (httpResponseMessage.IsSuccessStatusCode)
             {
@@ -28,7 +29,7 @@ namespace ConversationOverflowMVC.Helper
         }
         public async Task<string> AuthenticatedUser()
         {
-            HttpResponseMessage httpResponseMessage = await httpClient.GetAsync("User/AuthenticatedUser");
+            HttpResponseMessage httpResponseMessage = await _httpClient.GetAsync("User/AuthenticatedUser");
 
             if (httpResponseMessage.IsSuccessStatusCode)
             {

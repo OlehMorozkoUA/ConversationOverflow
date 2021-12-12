@@ -6,5 +6,7 @@ namespace Models.Interfaces
     {
         public string Name { get; set; }
         public DateTime CreationTime { get; set; }
+        public int? AdminId { get; set; }
+        public bool IsPrivate { get; set; }
     }
 }

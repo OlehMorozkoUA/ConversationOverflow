@@ -220,9 +220,6 @@ namespace ConnectToDB.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId")
-                        .IsUnique();
-
                     b.ToTable("Locations");
                 });
 
@@ -314,6 +311,12 @@ namespace ConnectToDB.Migrations
                     b.Property<string>("LastName")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("LocationId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("LocationId1")
+                        .HasColumnType("int");
+
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
 
@@ -354,6 +357,8 @@ namespace ConnectToDB.Migrations
                         .HasMaxLength(256);
 
                     b.HasKey("Id");
+
+                    b.HasIndex("LocationId1");
 
                     b.HasIndex("NormalizedEmail")
                         .HasName("EmailIndex");
@@ -475,20 +480,18 @@ namespace ConnectToDB.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Models.Classes.Location", b =>
-                {
-                    b.HasOne("Models.Classes.User", null)
-                        .WithOne("Location")
-                        .HasForeignKey("Models.Classes.Location", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Models.Classes.Message", b =>
                 {
                     b.HasOne("Models.Classes.Attachment", "Attachment")
                         .WithMany()
                         .HasForeignKey("AttachmentId1");
+                });
+
+            modelBuilder.Entity("Models.Classes.User", b =>
+                {
+                    b.HasOne("Models.Classes.Location", "Location")
+                        .WithMany()
+                        .HasForeignKey("LocationId1");
                 });
 
             modelBuilder.Entity("Models.Classes.UserMessage", b =>

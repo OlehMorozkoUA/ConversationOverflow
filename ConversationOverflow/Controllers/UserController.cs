@@ -17,6 +17,9 @@ using System.Text;
 using System.Text.Json;
 using System;
 using System.IO;
+using System.Security.Claims;
+using System.Linq;
+using System.Net.Http;
 
 namespace ConversationOverflow.Controllers
 {
@@ -27,19 +30,19 @@ namespace ConversationOverflow.Controllers
     {
         private readonly ILogger<UserController> _logger;
         private readonly IUserRepository _users;
-        private readonly IConfiguration _configuration;
+        private readonly ILocationRepository _locations;
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
 
         public UserController(ILogger<UserController> logger, 
             IUserRepository users,
-            IConfiguration configuration,
+            ILocationRepository locations,
             UserManager<User> userManager,
             SignInManager<User> signInManager)
         {
             _logger = logger;
             _users = users;
-            _configuration = configuration;
+            _locations = locations;
             _userManager = userManager;
             _signInManager = signInManager;
         }
@@ -67,6 +70,34 @@ namespace ConversationOverflow.Controllers
             => await _users.GetRangeUserByNameAsync(name, interval, index);
 
         [HttpGet]
+        [Route("rangeexcept/{interval}/{userIds}")]
+        public async Task<List<User>> GetUserExcept(int interval, string userIds)
+        {
+            List<int> listUserId = new List<int>();
+            if (userIds == null) userIds = "";
+            foreach (string userId in userIds.Split(","))
+            {
+                if (userId != "") listUserId.Add(Convert.ToInt32(userId));
+            }
+
+            return await _users.GetUserExcept(interval, listUserId);
+        }
+
+        [HttpGet]
+        [Route("rangeexceptbyname/{interval}/{name}/{userIds}")]
+        public async Task<List<User>> GetUserExcept(int interval, string name, string userIds)
+        {
+            List<int> listUserId = new List<int>();
+            if (userIds == null) userIds = "";
+            foreach (string userId in userIds.Split(","))
+            {
+                if (userId != "") listUserId.Add(Convert.ToInt32(userId));
+            }
+
+            return await _users.GetUserExcept(interval, name, listUserId);
+        }
+
+        [HttpGet]
         [Route("countpagination/{interval}")]
         public async Task<int> GetCountPagination(int interval) => await _users.GetCountUserPaginationAsync(interval);
 
@@ -91,7 +122,11 @@ namespace ConversationOverflow.Controllers
         [HttpGet]
         [Route("birthday/{birthday}")]
         public async Task<List<User>> GetByBirthday(string birthday) => await _users.GetUsersByBirthdayAsync(birthday);
-        
+
+        [HttpGet]
+        [Route("location/{userId}")]
+        public async Task<Location> GetLocationByUserId(int userId) => await _locations.GetLocationByUserIdAsync(userId);
+
         [HttpPost]
         [Route("[action]")]
         [AllowAnonymous]
@@ -134,6 +169,7 @@ namespace ConversationOverflow.Controllers
         {
             User user = await _users.GetUserByEmailAsync(forgotPasswordDto.Email);
             string code = await _users.GenerateEmailConfirmationTokenAsync(user);
+
             await _users.SendEmailAsync(user, Url.Action(
                 "ResetPassword",
                 "User",
@@ -154,9 +190,14 @@ namespace ConversationOverflow.Controllers
             if (user == null) return Redirect(returnUrl.Replace("/User/ResetPassword", "/User/LogIn"));
             IdentityResult result = await _userManager.ConfirmEmailAsync(user, code);
 
-            if (result.Succeeded) return Redirect(returnUrl + "?"
+            
+            if (result.Succeeded)
+            {
+                code = await _users.GenerateEmailConfirmationTokenAsync(user);
+                return Redirect(returnUrl + "?"
                 + System.Net.WebUtility.UrlEncode("code") + "="
                 + System.Net.WebUtility.UrlEncode(code));
+            }
             else return Redirect(returnUrl.Replace("/User/ResetPassword", "/User/LogIn"));
         }
 
@@ -216,27 +257,47 @@ namespace ConversationOverflow.Controllers
 
         [HttpPost]
         [Route("[action]")]
-        public async Task LogOut()
-            => await _signInManager.SignOutAsync();
-
-        [HttpPut]
-        [Route("[action]")]
-        public async Task UpdateFirstName([FromBody] JsonElement body)
-            => await _users.UpdateFirstName(User.Identity.Name, body.GetProperty("firstname").ToString());
-
-        [HttpPut]
-        [Route("[action]")]
-        public async Task UpdateLastName([FromBody] JsonElement body)
-            => await _users.UpdateLastName(User.Identity.Name, body.GetProperty("lastname").ToString());
-
-        [HttpPut]
-        [Route("[action]")]
-        public async Task UpdateBirthday([FromBody] JsonElement body)
+        public async Task<string> LogOut(UserDto userDto)
         {
-            DateTime date = DateTime.ParseExact(body.GetProperty("birthday").ToString(), 
-                "yyyy-M-d", System.Globalization.CultureInfo.InvariantCulture);
-            await _users.UpdateBirthday(User.Identity.Name, date);
+            User user = await _users.GetUserByLoginAsync(userDto.Login);
+
+            if (user.PasswordHash == userDto.PasswordHash)
+            {
+                await _signInManager.SignInAsync(user, false);
+            }
+            await _signInManager.SignOutAsync();
+
+            return User.Identity.Name;
         }
+
+        [HttpPost]
+        [Route("[action]")]
+        public async Task AddLocation([FromBody] LocationDto locationDto)
+        {
+            User user = await GetByLogin(User.Identity.Name);
+            await _locations.AddLocationAsync(user.Id, new Location()
+            {
+                Country = locationDto.Country,
+                Region = locationDto.Region,
+                Address = locationDto.Address,
+                Postcode = locationDto.Postcode
+            });
+        }
+
+        [HttpPut]
+        [Route("[action]")]
+        public async Task UpdateFirstName([FromBody] ProfileDto profileDto)
+            => await _users.UpdateFirstName(User.Identity.Name, profileDto.FirstName);
+
+        [HttpPut]
+        [Route("[action]")]
+        public async Task UpdateLastName([FromBody] ProfileDto profileDto)
+            => await _users.UpdateLastName(User.Identity.Name, profileDto.LastName);
+
+        [HttpPut]
+        [Route("[action]")]
+        public async Task UpdateBirthday([FromBody] ProfileDto profileDto)
+            => await _users.UpdateBirthday(User.Identity.Name, profileDto.Birthday);
 
         [HttpPut]
         [Route("[action]")]
@@ -256,7 +317,51 @@ namespace ConversationOverflow.Controllers
 
         [HttpPut]
         [Route("[action]")]
-        public async Task UpdatePhoneNumber([FromBody] JsonElement body)
-            => await _users.UpdatePhoneNumber(User.Identity.Name, body.GetProperty("phonenumber").ToString());
+        public async Task UpdatePhoneNumber([FromBody] ProfileDto profileDto)
+            => await _users.UpdatePhoneNumber(User.Identity.Name, profileDto.PhoneNumber);
+
+        [HttpPut]
+        [Route("[action]")]
+        public async Task UpdateLocation([FromBody] LocationDto locationDto)
+        {
+            User user = await GetByLogin(User.Identity.Name);
+            Location location = await _locations.GetLocationByUserIdAsync(user.Id);
+            Location newLocation = new Location()
+            {
+                Country = locationDto.Country,
+                Region = locationDto.Region,
+                Address = locationDto.Address,
+                Postcode = locationDto.Postcode
+            };
+
+            if (location != null)
+            {
+                newLocation = new Location()
+                {
+                    Country = (locationDto.Country == null) ? location.Country : locationDto.Country,
+                    Region = (locationDto.Region == null) ? location.Region : locationDto.Region,
+                    Address = (locationDto.Address == null) ? location.Address : locationDto.Address,
+                    Postcode = (locationDto.Postcode == 0) ? location.Postcode : locationDto.Postcode
+                };
+                await _locations.UpdateLocationAsync(user.Id, newLocation);
+            }
+            else
+            {
+                await _locations.AddLocationAsync(user.Id, newLocation);
+            }
+        }
+
+        [HttpPost]
+        [Route("[action]")]
+        [AllowAnonymous]
+        public async Task ReloadHttpClient(UserDto userDto)
+        {
+            User user = await _users.GetUserByLoginAsync(userDto.Login);
+
+            if (user.PasswordHash == userDto.PasswordHash)
+            {
+                await _signInManager.SignInAsync(user, false);
+            }
+        }
     }
 }

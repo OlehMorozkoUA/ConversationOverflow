@@ -2,7 +2,7 @@
     @if ((bool)ViewData["IsAuthenticated"])
     {
         <li class="nav-item">
-            <span class="navbar-text text-dark font-italic font-weight-bold">@ViewData["AuthenticatedUser"]</span>
+            <span class="navbar-text text-dark font-italic font-weight-bold">@User.Identity.Name</span>
         </li>
         <li class="nav-item">
             <form method="post" asp-controller="User" asp-action="LogOutService">

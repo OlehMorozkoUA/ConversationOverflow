@@ -9,6 +9,8 @@ namespace Models.Classes
         public string Region { get; set; }
         public string Address { get; set; }
         public int Postcode { get; set; }
+
         public int UserId { get; set; }
+        public User User { get; set; }
     }
 }

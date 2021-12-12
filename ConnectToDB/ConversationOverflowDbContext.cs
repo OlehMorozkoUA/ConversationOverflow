@@ -19,5 +19,21 @@ namespace ConnectToDB
         {
             Database.EnsureCreated();
         }
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+
+            builder.Entity<User>()
+                .HasOne(user => user.Location)
+                .WithOne(location => location.User)
+                .HasForeignKey<Location>(location => location.UserId);
+        }
+
+        /*protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseSqlServer(
+                @"Data Source=.\sqlexpress;Initial Catalog=ConversationOverflow;Integrated Security=True;");
+        }*/
     }
 }

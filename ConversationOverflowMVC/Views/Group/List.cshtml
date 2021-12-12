@@ -1,0 +1,44 @@
+﻿<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<header class="mb-3">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-info">
+        <div class="container-fluid">
+            <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <div class="px-4 d-none d-md-block">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-grow-1">
+                                    <input id="SearchGroup" type="text" class="form-control my-3" placeholder="Search...">
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="nav-item">
+                        <div class="px-4 d-none d-md-block">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-grow-1">
+                                    <form asp-action="Add" asp-controller="Group">
+                                        <button type="submit" class="btn btn-warning my-3">New</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<div id="ListGroupCard" class="row row-cols-1 row-cols-md-3"></div>
+<ul id="paginationGroup" class="pagination justify-content-center"></ul>
+
+
+<script>
+    var listGroupCard = "@Url.Action("_ListGroupCard", "Group")";
+    var paginationGroup = "@Url.Action("_PaginationGroup", "Group")";
+    var getCountPagination = "@Url.ActionLink("GetCountOnlyGroupPagination", "Group")";
+</script>
+
+<script src="/js/paginationGroupCard.js" type="text/javascript"></script>

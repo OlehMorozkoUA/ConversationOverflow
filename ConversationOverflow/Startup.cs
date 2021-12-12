@@ -44,7 +44,7 @@ namespace ConversationOverflow
 
             services.AddAuthentication(AzureADDefaults.BearerAuthenticationScheme)
                 .AddAzureADBearer(options => Configuration.Bind("AzureAd", options));
-            services.AddControllers();
+            services.AddControllers().AddNewtonsoftJson();
 
             var connectionString = Configuration.GetConnectionString("ConversationOverflowConnection");
 
@@ -59,8 +59,12 @@ namespace ConversationOverflow
                 })
                 .AddEntityFrameworkStores<ConversationOverflowDbContext>()
                 .AddDefaultTokenProviders();
+            services.AddControllers().AddNewtonsoftJson(x => x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IGroupRepository, GroupRepository>();
+            services.AddScoped<ILocationRepository, LocationRepository>();
+            services.AddScoped<IMessageRepository, MessageRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

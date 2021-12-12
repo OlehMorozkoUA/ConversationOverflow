@@ -1,0 +1,47 @@
+﻿@using Models.Classes;
+@model (List<Group> Groups, string name)
+ 
+@functions
+{
+    public static string ReplaceFirstOccurrence(string Source, string Find, string Replace)
+    {
+        int Place = Source.IndexOf(Find, StringComparison.OrdinalIgnoreCase);
+        string result = Source.Remove(Place, Find.Length).Insert(Place, Replace);
+        return result;
+    }
+
+    public static string GetFirstOccurence(string Source, string Find)
+    {
+        int Place = Source.IndexOf(Find, StringComparison.OrdinalIgnoreCase);
+        string result = Source.Substring(Place, Find.Length);
+        return result;
+    }
+}
+
+@foreach (Group group in Model.Groups)
+{
+    <a href="#" data-groupId="@group.Id" class="list-group-item list-group-item-action border-0">
+        <!--<div class="badge bg-success float-right">5</div>-->
+        <div class="d-flex align-items-start">
+            <img src="@group.ImagePath" class="rounded-circle mr-1" alt="Vanessa Tucker" width="40" height="40">
+            <div class="flex-grow-1 ml-3">
+                @if (Model.name == "")
+                {
+                    @group.Name
+                }
+                else
+                {
+                    string text = ReplaceFirstOccurrence(group.Name, Model.name, "<strong>" + GetFirstOccurence(group.Name, Model.name) + "</strong>");
+                    Microsoft.AspNetCore.Html.HtmlString html = new Microsoft.AspNetCore.Html.HtmlString(text);
+
+                    @html
+                }
+                <div class="small">@group.CreationTime.ToString("yyyy-MM-dd")</div>
+                @if (group.IsPrivate)
+                {
+                    <div class="small"><span class="fas fa-circle chat-online"></span>Online</div>
+                }
+            </div>
+        </div>
+    </a>
+}

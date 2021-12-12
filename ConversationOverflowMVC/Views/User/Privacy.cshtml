@@ -16,7 +16,7 @@
                                 <span class="input-group-text"> <i class="fa fa-user-plus"></i> </span>
                             </div>
                             <input value="@Model.FirstName" name="FirstName" id="FirstName" class="form-control" placeholder="first name" type="text" required>
-                            <div style="cursor:pointer;" id="UpdateFirstName" class="btn btn-primary">Update</div>
+                            <div style="cursor:pointer;" id="UpdateFirstName" class="btn btn-primary" data-toggle="modal" data-target="#info">Update</div>
                         </div>
                     </div>
                 </form>
@@ -27,7 +27,7 @@
                                 <span class="input-group-text"> <i class="fa fa-user-plus"></i> </span>
                             </div>
                             <input value="@Model.LastName" name="LastName" id="LastName" class="form-control" placeholder="last name" type="text" required>
-                            <div style="cursor:pointer;" id="UpdateLastName" class="btn btn-primary">Update</div>
+                            <div style="cursor:pointer;" id="UpdateLastName" class="btn btn-primary" data-toggle="modal" data-target="#info">Update</div>
                         </div>
                     </div>
                 </form>
@@ -38,7 +38,7 @@
                                 <span class="input-group-text"> <i class="fa fa-calendar"></i> </span>
                             </div>
                             <input value="@Model.Birthday.ToString("yyyy-MM-dd")" name="Birthday" id="Birthday" class="form-control" placeholder="birthday" type="date" required>
-                            <div style="cursor:pointer;" id="UpdateBirthday" class="btn btn-primary">Update</div>
+                            <div style="cursor:pointer;" id="UpdateBirthday" class="btn btn-primary" data-toggle="modal" data-target="#info">Update</div>
                         </div>
                     </div>
                 </form>
@@ -52,7 +52,7 @@
                                 <input name="Image" id="Image" class="form-control custom-file-input" placeholder="image path" type="file">
                                 <label class="custom-file-label">Choose File...</label>
                             </div>
-                            <div style="cursor:pointer;" id="UpdateImage" class="btn btn-primary">Update</div>
+                            <div style="cursor:pointer;" id="UpdateImage" class="btn btn-primary" data-toggle="modal" data-target="#info">Update</div>
                         </div>
                     </div>
                 </form>
@@ -63,7 +63,7 @@
                                 <span class="input-group-text"> <i class="fa fa-phone"></i> </span>
                             </div>
                             <input value="@Model.PhoneNumber" name="PhoneNumber" id="PhoneNumber" class="form-control" placeholder="(xxx)-xxx-xxxx" type="tel" required>
-                            <div style="cursor:pointer;" id="UpdatePhoneNumber" class="btn btn-primary">Update</div>
+                            <div style="cursor:pointer;" id="UpdatePhoneNumber" class="btn btn-primary" data-toggle="modal" data-target="#info">Update</div>
                         </div>
                     </div>
                 </form>
@@ -73,8 +73,8 @@
                             <div class="input-group-prepend">
                                 <span class="input-group-text"> <i class="fa fa-flag"></i> </span>
                             </div>
-                            <input value="" name="Country" id="Country" class="form-control" placeholder="country" type="text" required>
-                            <div style="cursor:pointer;" id="UpdateCountry" class="btn btn-primary">Update</div>
+                            <input value="@Model.Location.Country" name="Country" id="Country" class="form-control" placeholder="country" type="text" required>
+                            <div style="cursor:pointer;" name="UpdateLocation" data-update="Country" class="btn btn-primary" data-toggle="modal" data-target="#info">Update</div>
                         </div>
                     </div>
                 </form>
@@ -84,8 +84,8 @@
                             <div class="input-group-prepend">
                                 <span class="input-group-text"> <i class="fa fa-area-chart"></i> </span>
                             </div>
-                            <input value="" name="Region" id="Region" class="form-control" placeholder="region" type="text" required>
-                            <div style="cursor:pointer;" id="UpdateRegion" class="btn btn-primary">Update</div>
+                            <input value="@Model.Location.Region" name="Region" id="Region" class="form-control" placeholder="region" type="text" required>
+                            <div style="cursor:pointer;" name="UpdateLocation" data-update="Region" class="btn btn-primary" data-toggle="modal" data-target="#info">Update</div>
                         </div>
                     </div>
                 </form>
@@ -95,8 +95,8 @@
                             <div class="input-group-prepend">
                                 <span class="input-group-text"> <i class="fa fa-address-card"></i> </span>
                             </div>
-                            <input value="" name="Address" id="Address" class="form-control" placeholder="address" type="text" required>
-                            <div style="cursor:pointer;" id="UpdateAddress" class="btn btn-primary">Update</div>
+                            <input value="@Model.Location.Address" name="Address" id="Address" class="form-control" placeholder="address" type="text" required>
+                            <div style="cursor:pointer;" name="UpdateLocation" data-update="Address" class="btn btn-primary" data-toggle="modal" data-target="#info">Update</div>
                         </div>
                     </div>
                 </form>
@@ -106,8 +106,8 @@
                             <div class="input-group-prepend">
                                 <span class="input-group-text"> <i class="fa fa-address-card"></i> </span>
                             </div>
-                            <input value="" name="Postcode" id="Postcode" class="form-control" placeholder="postcode" type="text" required>
-                            <div style="cursor:pointer;" id="UpdatePostcode" class="btn btn-primary">Update</div>
+                            <input value="@Model.Location.Postcode" name="Postcode" id="Postcode" class="form-control" placeholder="postcode" type="text" required>
+                            <div style="cursor:pointer;" name="UpdateLocation" data-update="Postcode" class="btn btn-primary" data-toggle="modal" data-target="#info">Update</div>
                         </div>
                     </div>
                 </form>
@@ -117,10 +117,26 @@
     <aside class="col-sm-4"></aside>
 </div>
 
+<div class="modal fade" id="info" tabindex="-1" role="dialog" aria-labelledby="infoLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="infoLabel"></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div id="infoBody" class="modal-body"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.maskedinput/1.4.1/jquery.maskedinput.min.js"></script>
 <script type="text/javascript">
-
     $(document).ready(function () {
         $("#UpdateFirstName").click(function () {
             var oldFirstName = $("#FirstName").val();
@@ -135,6 +151,8 @@
                     if (response != "true") {
                         $("#FirstName").val(oldFirstName);
                     }
+                    $("#infoLabel").html("Update First Name");
+                    $("#infoBody").html("First Name is updated");
                 },
                 failure: function (response) {
                     alert(response.responseText);
@@ -157,6 +175,8 @@
                     if (response != "true") {
                         $("#LastName").val(oldLastName);
                     }
+                    $("#infoLabel").html("Update Last Name");
+                    $("#infoBody").html("Last Name is updated");
                 },
                 failure: function (response) {
                     alert(response.responseText);
@@ -179,6 +199,8 @@
                     if (response != "true") {
                         $("#Birthday").val(oldBirthday);
                     }
+                    $("#infoLabel").html("Update Birthday");
+                    $("#infoBody").html("Birthday is updated");
                 },
                 failure: function (response) {
                     alert(response.responseText);
@@ -198,7 +220,8 @@
                 contentType: false,
                 processData: false,
                 success: function (response) {
-
+                    $("#infoLabel").html("Update Image");
+                    $("#infoBody").html("Image is updated");
                 },
                 failure: function (response) {
                     alert(response.responseText);
@@ -221,6 +244,33 @@
                     if (response != "true") {
                         $("#PhoneNumber").val(oldPhoneNumber);
                     }
+                    $("#infoLabel").html("Update Phone");
+                    $("#infoBody").html("Phone is updated");
+                },
+                failure: function (response) {
+                    alert(response.responseText);
+                },
+                error: function (response) {
+                    alert(response.responseText);
+                }
+            });
+        });
+        $("div[name=UpdateLocation]").on("click", function (event) {
+            let button = event.target;
+
+            var variable = button.getAttribute("data-update");
+            var value = $("#" + button.getAttribute("data-update")).val();
+
+            var data = JSON.parse("{\"" + variable + "\":\"" + value + "\"}");
+
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("UpdateLocation")",
+                data: data,
+                dataType: "text",
+                success: function (response) {
+                    $("#infoLabel").html("Update " + variable);
+                    $("#infoBody").html(variable + " is updated");
                 },
                 failure: function (response) {
                     alert(response.responseText);
