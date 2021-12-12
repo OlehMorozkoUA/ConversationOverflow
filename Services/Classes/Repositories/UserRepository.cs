@@ -1,4 +1,5 @@
 ﻿using ConnectToDB;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Models.Classes;
@@ -15,11 +16,17 @@ namespace Services.Classes.Repositories
     {
         private readonly ConversationOverflowDbContext _conversationOverflowDbContext;
         private readonly UserManager<User> _userManager;
+        private readonly IHttpContextAccessor _context;
+        private readonly string _login;
         public UserRepository(ConversationOverflowDbContext conversationOverflowDbContext,
-            UserManager<User> userManager)
+            UserManager<User> userManager,
+            IHttpContextAccessor context)
         {
             _conversationOverflowDbContext = conversationOverflowDbContext;
             _userManager = userManager;
+            _context = context;
+
+            _login = _context.HttpContext.User?.Identity?.Name;
         }
         public async Task<IdentityResult> CreateUserAsync(User user, string password)
         {
@@ -57,6 +64,7 @@ namespace Services.Classes.Repositories
         protected IQueryable<User> GetRangeUserQueryable(int interval, int index)
             => _conversationOverflowDbContext.Users.AsQueryable()
             .Include(user => user.Location)
+            .Where(user => user.Login != _login)
             .OrderBy(user => (user.FirstName + user.LastName))
             .Skip(index * interval)
             .Take(interval);
@@ -71,14 +79,44 @@ namespace Services.Classes.Repositories
             .Where(user => (user.FirstName.Contains(name.Trim()) && user.FirstName.StartsWith(name.Trim())) ||
                   (user.LastName.Contains(name.Trim()) && user.LastName.StartsWith(name.Trim())) ||
                   ((user.FirstName + " " + user.LastName).Contains(name.Trim()) && (user.FirstName + " " + user.LastName).StartsWith(name.Trim())) ||
-                  ((user.LastName + " " + user.FirstName).Contains(name.Trim()) && (user.LastName + " " + user.FirstName).StartsWith(name.Trim())))
+                  ((user.LastName + " " + user.FirstName).Contains(name.Trim()) && (user.LastName + " " + user.FirstName).StartsWith(name.Trim())) &&
+                  user.Login != _login
+            )
             .OrderBy(user => (user.FirstName + user.LastName))
             .Skip(index * interval)
             .Take(interval);
 
+        public async Task<List<User>> GetUserExcept(int interval, List<int> userIds)
+            => await GetUserExceptQueryable(interval, userIds)
+            .ToListAsync();
+
+        protected IQueryable<User> GetUserExceptQueryable(int interval, List<int> userIds)
+            => _conversationOverflowDbContext.Users.AsQueryable()
+            .Include(user => user.Location)
+            .Where(user => user.Login != _login && !userIds.Contains(user.Id))
+            .OrderBy(user => (user.FirstName + user.LastName))
+            .Take(interval);
+
+        public async Task<List<User>> GetUserExcept(int interval, string name, List<int> userIds)
+            => await GetUserExceptQueryable(interval, name, userIds)
+            .ToListAsync();
+
+        protected IQueryable<User> GetUserExceptQueryable(int interval, string name, List<int> userIds)
+            => _conversationOverflowDbContext.Users.AsQueryable()
+            .Include(user => user.Location)
+            .Where(user => (user.FirstName.Contains(name.Trim()) && user.FirstName.StartsWith(name.Trim())) ||
+                  (user.LastName.Contains(name.Trim()) && user.LastName.StartsWith(name.Trim())) ||
+                  ((user.FirstName + " " + user.LastName).Contains(name.Trim()) && (user.FirstName + " " + user.LastName).StartsWith(name.Trim())) ||
+                  ((user.LastName + " " + user.FirstName).Contains(name.Trim()) && (user.LastName + " " + user.FirstName).StartsWith(name.Trim())) &&
+                  user.Login != _login
+            )
+            .OrderBy(user => (user.FirstName + user.LastName))
+            .Where(user => !userIds.Contains(user.Id))
+            .Take(interval);
+
         public async Task<int> GetCountUserPaginationAsync(int interval)
             => Convert.ToInt32(
-                Math.Ceiling((await _conversationOverflowDbContext.Users.AsQueryable().CountAsync()) / Convert.ToDouble(interval)));
+                Math.Ceiling((await _conversationOverflowDbContext.Users.AsQueryable().Where(user => user.Login != _login).CountAsync()) / Convert.ToDouble(interval)));
 
         public async Task<int> GetCountUserPaginationAsync(string name, int interval)
             => Convert.ToInt32(
@@ -100,7 +138,9 @@ namespace Services.Classes.Repositories
                 .Where(user => (user.FirstName.Contains(name.Trim()) && user.FirstName.StartsWith(name.Trim())) ||
                                (user.LastName.Contains(name.Trim()) && user.LastName.StartsWith(name.Trim())) ||
                                ((user.FirstName + " " + user.LastName).Contains(name.Trim()) && (user.FirstName + " " + user.LastName).StartsWith(name.Trim())) ||
-                               ((user.LastName + " " + user.FirstName).Contains(name.Trim()) && (user.LastName + " " + user.FirstName).StartsWith(name.Trim())))
+                               ((user.LastName + " " + user.FirstName).Contains(name.Trim()) && (user.LastName + " " + user.FirstName).StartsWith(name.Trim())) &&
+                               user.Login != _login
+                )
                 .OrderBy(user => user.FirstName);
 
         public async Task<List<User>> GetUsersByBirthdayAsync(string birthday)
@@ -108,7 +148,9 @@ namespace Services.Classes.Repositories
                 .Include(user => user.Location)
                 .Where(user => (user.Birthday.Year.ToString()+"-"+
                                 user.Birthday.Month.ToString()+"-"+
-                                user.Birthday.Day.ToString()) == birthday)
+                                user.Birthday.Day.ToString()) == birthday &&
+                                user.Login != _login
+                )
                 .OrderBy(user => user.Birthday)
                 .ToListAsync();
         public async Task<Location> GetLocationAsync(int id)

@@ -1,0 +1,23 @@
+﻿@using Models.Classes;
+@model (Group group, User user)
+
+@if (Model.group.IsPrivate)
+{
+    <div class="position-relative">
+        <img src="@Model.user.ImagePath" class="rounded-circle mr-1" alt="@(Model.user.FirstName + Model.user.LastName)" width="40" height="40">
+    </div>
+    <div class="flex-grow-1 pl-3">
+        <strong>@(Model.user.FirstName + " " +  Model.user.LastName)</strong>
+        <div id="dot3" class="text-muted small"><em>Typing...</em></div>
+    </div>
+}
+else
+{
+    <div class="position-relative">
+        <img src="@Model.group.ImagePath" class="rounded-circle mr-1" alt="@Model.group.Name" width="40" height="40">
+    </div>
+    <div class="flex-grow-1 pl-3">
+        <strong>@Model.group.Name</strong>
+        <div id="dot3" class="text-muted small"><em>Typing...</em></div>
+    </div>
+}

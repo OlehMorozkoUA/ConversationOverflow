@@ -1,0 +1,1 @@
+https://www.sqlshack.com/configure-database-mail-sql-server/

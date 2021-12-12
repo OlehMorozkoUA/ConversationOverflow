@@ -17,6 +17,9 @@ using System.Text;
 using System.Text.Json;
 using System;
 using System.IO;
+using System.Security.Claims;
+using System.Linq;
+using System.Net.Http;
 
 namespace ConversationOverflow.Controllers
 {
@@ -65,6 +68,34 @@ namespace ConversationOverflow.Controllers
         [Route("rangebyname/{name}/{interval}/{index}")]
         public async Task<List<User>> GetRangeByName(string name, int interval, int index)
             => await _users.GetRangeUserByNameAsync(name, interval, index);
+
+        [HttpGet]
+        [Route("rangeexcept/{interval}/{userIds}")]
+        public async Task<List<User>> GetUserExcept(int interval, string userIds)
+        {
+            List<int> listUserId = new List<int>();
+            if (userIds == null) userIds = "";
+            foreach (string userId in userIds.Split(","))
+            {
+                if (userId != "") listUserId.Add(Convert.ToInt32(userId));
+            }
+
+            return await _users.GetUserExcept(interval, listUserId);
+        }
+
+        [HttpGet]
+        [Route("rangeexceptbyname/{interval}/{name}/{userIds}")]
+        public async Task<List<User>> GetUserExcept(int interval, string name, string userIds)
+        {
+            List<int> listUserId = new List<int>();
+            if (userIds == null) userIds = "";
+            foreach (string userId in userIds.Split(","))
+            {
+                if (userId != "") listUserId.Add(Convert.ToInt32(userId));
+            }
+
+            return await _users.GetUserExcept(interval, name, listUserId);
+        }
 
         [HttpGet]
         [Route("countpagination/{interval}")]
@@ -138,6 +169,7 @@ namespace ConversationOverflow.Controllers
         {
             User user = await _users.GetUserByEmailAsync(forgotPasswordDto.Email);
             string code = await _users.GenerateEmailConfirmationTokenAsync(user);
+
             await _users.SendEmailAsync(user, Url.Action(
                 "ResetPassword",
                 "User",
@@ -158,9 +190,14 @@ namespace ConversationOverflow.Controllers
             if (user == null) return Redirect(returnUrl.Replace("/User/ResetPassword", "/User/LogIn"));
             IdentityResult result = await _userManager.ConfirmEmailAsync(user, code);
 
-            if (result.Succeeded) return Redirect(returnUrl + "?"
+            
+            if (result.Succeeded)
+            {
+                code = await _users.GenerateEmailConfirmationTokenAsync(user);
+                return Redirect(returnUrl + "?"
                 + System.Net.WebUtility.UrlEncode("code") + "="
                 + System.Net.WebUtility.UrlEncode(code));
+            }
             else return Redirect(returnUrl.Replace("/User/ResetPassword", "/User/LogIn"));
         }
 
@@ -220,8 +257,18 @@ namespace ConversationOverflow.Controllers
 
         [HttpPost]
         [Route("[action]")]
-        public async Task LogOut()
-            => await _signInManager.SignOutAsync();
+        public async Task<string> LogOut(UserDto userDto)
+        {
+            User user = await _users.GetUserByLoginAsync(userDto.Login);
+
+            if (user.PasswordHash == userDto.PasswordHash)
+            {
+                await _signInManager.SignInAsync(user, false);
+            }
+            await _signInManager.SignOutAsync();
+
+            return User.Identity.Name;
+        }
 
         [HttpPost]
         [Route("[action]")]
@@ -301,6 +348,19 @@ namespace ConversationOverflow.Controllers
             else
             {
                 await _locations.AddLocationAsync(user.Id, newLocation);
+            }
+        }
+
+        [HttpPost]
+        [Route("[action]")]
+        [AllowAnonymous]
+        public async Task ReloadHttpClient(UserDto userDto)
+        {
+            User user = await _users.GetUserByLoginAsync(userDto.Login);
+
+            if (user.PasswordHash == userDto.PasswordHash)
+            {
+                await _signInManager.SignInAsync(user, false);
             }
         }
     }

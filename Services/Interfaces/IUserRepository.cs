@@ -27,5 +27,7 @@ namespace Services.Interfaces
         Task<int> GetCountUserPaginationAsync(int interval);
         Task<int> GetCountUserPaginationAsync(string name, int interval);
         Task<List<User>> GetRangeUserByNameAsync(string name, int interval, int index);
+        Task<List<User>> GetUserExcept(int interval, List<int> userIds);
+        Task<List<User>> GetUserExcept(int interval, string name, List<int> userIds);
     }
 }

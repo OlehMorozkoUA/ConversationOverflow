@@ -11,6 +11,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using ConversationOverflowMVC.Helper;
 using Microsoft.AspNetCore.Http;
+using ConnectToDB;
+using Microsoft.EntityFrameworkCore;
+using ConversationOverflowMVC.Hubs;
 
 namespace ConversationOverflowMVC
 {
@@ -26,9 +29,23 @@ namespace ConversationOverflowMVC
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var connectionString = Configuration.GetConnectionString("ConversationOverflowConnection");
+
+            services.AddDbContext<ConversationOverflowDbContext>(options => options.UseSqlServer(connectionString));
+
             services.AddControllersWithViews();
-            services.AddSingleton<IConversationOverflowAPI, ConversationOverflowAPI>();
+            //services.AddSingleton<IConversationOverflowAPI, ConversationOverflowAPI>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddHttpClient();
+            services.AddHttpClient<IConversationOverflowAPI, ConversationOverflowAPI>()
+                .SetHandlerLifetime(TimeSpan.FromMinutes(5));
+
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                    .AddCookie(options => //CookieAuthenticationOptions
+                    {
+                        options.LoginPath = new Microsoft.AspNetCore.Http.PathString("/User/LogIn");
+                    });
+            services.AddSignalR();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -49,6 +66,7 @@ namespace ConversationOverflowMVC
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
@@ -56,6 +74,7 @@ namespace ConversationOverflowMVC
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=User}/{action=LogIn}/{id?}");
+                endpoints.MapHub<ChatHub>("/chatHub");
             });
         }
     }

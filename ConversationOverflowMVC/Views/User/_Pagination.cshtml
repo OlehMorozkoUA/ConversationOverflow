@@ -1,8 +1,40 @@
-﻿@{ 
+﻿@model (int index, int max, string name)
+@{
+    (int index, int max, string name) tuple = Model;
     int interval = 3;
     int total = Convert.ToInt32(ViewData["Count"]);
 }
-@for (int i = 1; i <= interval; i++)
+<style>
+    .page-item {
+        cursor: pointer;
+        user-select: none;
+    }
+
+    #previous .page-link {
+        border-radius: 5px 0 0 5px;
+    }
+</style>
+<li id="previous" class="page-item">
+    <a class="page-link" aria-label="Previous">
+        <span aria-hidden="true">&laquo;</span>
+        <span class="sr-only">Previous</span>
+    </a>
+</li>
+@for (int i = tuple.index; i <= interval + tuple.index - 1 && i <= tuple.max; i++)
 {
-    <li class="page-item page-link">@i</li>
+    <li name="page" number="@(i-1)" class="page-item">
+        <a class="page-link">@i</a>
+    </li>
 }
+@if ((tuple.index + interval - 1) < tuple.max)
+{
+    <li name="moveto" number="@(tuple.index + interval - 1)" class="page-item">
+        <a class="page-link">...</a>
+    </li>
+}
+<li id="next" class="page-item">
+    <a class="page-link" aria-label="Next">
+        <span aria-hidden="true">&raquo;</span>
+        <span class="sr-only">Next</span>
+    </a>
+</li>

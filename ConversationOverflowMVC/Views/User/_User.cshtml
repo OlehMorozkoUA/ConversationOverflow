@@ -1,0 +1,10 @@
+﻿@using Models.Classes;
+@model User
+
+<div class="position-relative">
+    <img src="@Model.ImagePath" class="rounded-circle mr-1" alt="@(Model.FirstName + Model.LastName)" width="40" height="40">
+</div>
+<div class="flex-grow-1 pl-3">
+    <strong>@(Model.FirstName + " " + Model.LastName)</strong>
+    <div id="dot3" class="text-muted small"><em>Typing...</em></div>
+</div>

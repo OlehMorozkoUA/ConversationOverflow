@@ -1,0 +1,19 @@
+﻿@using Services.Classes;
+@model List<MessageDto>
+
+@{ 
+    string AuthenticatedUser = (string)ViewData["AuthenticatedUser"];
+}
+
+@foreach (MessageDto m in Model)
+{
+    <div>
+        @(m.Login == AuthenticatedUser ? "You" : m.UserName)
+    </div>
+    <div>
+        @m.Message.Text
+    </div>
+    <div>
+        @m.Message.CreationTime
+    </div>
+}
